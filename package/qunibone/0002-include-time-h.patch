@@ -1,0 +1,14 @@
+# Include time.h needed for struct timespec
+#
+diff --git a/10.01_base/2_src/arm/utils.hpp b/10.01_base/2_src/arm/utils.hpp
+index 2c21920..6648baf 100644
+--- a/10.01_base/2_src/arm/utils.hpp
++++ b/10.01_base/2_src/arm/utils.hpp
+@@ -31,6 +31,7 @@
+ #include <stdint.h>
+ #include <stdbool.h>
+ #include <string.h>
++#include <time.h>
+ 
+ #include <string>
+ #include <algorithm> // TRIM_STRING

@@ -1,0 +1,54 @@
+diff --git a/10.01_base/2_src/arm/gpios.cpp b/10.01_base/2_src/arm/gpios.cpp
+index 0d602e1..3b1fc64 100644
+--- a/10.01_base/2_src/arm/gpios.cpp
++++ b/10.01_base/2_src/arm/gpios.cpp
+@@ -33,6 +33,7 @@
+ #include <time.h>
+ #include <assert.h>
+ #include <fcntl.h>
++#include <unistd.h>
+ #include <sys/mman.h>
+ #include <sys/stat.h>
+ 
+@@ -133,19 +134,31 @@ void gpios_c::export_pin(gpio_config_t *pin)
+     char fname[256];
+     FILE *f;
+     struct stat statbuff;
++    int retry = 0;
+ 
+-    sprintf(fname, "/sys/class/gpio/export");
+-    f = fopen(fname, "w");
+-    if (!f)
+-        FATAL("Can not open %s", fname);
+-    fprintf(f, "%d\n", pin->linear_no);
+-    fclose(f);
+-
+-    // verify: now there should appear the control directory for the pin
+     sprintf(fname, "/sys/class/gpio/gpio%d", pin->linear_no);
+-    if (stat(fname, &statbuff) != 0 || !S_ISDIR(statbuff.st_mode))
+-        FATAL("Gpio control dir %s not generated", fname);
+ 
++    // export GPIO and wait for control directory to appear
++    // do nothing if GPIO already exported
++    while (true) {
++        if (stat(fname, &statbuff) == 0)
++            break;
++        if (errno != ENOENT) {
++            FATAL("Error accessing %s: %d\n", fname, errno);
++        }
++        if (retry == 0) {
++            f = fopen("/sys/class/gpio/export", "w");
++            if (!f)
++                FATAL("Cannot open /sys/class/gpio/export: %d\n", errno);
++            fprintf(f, "%d\n", pin->linear_no);
++            fclose(f);
++        }
++        retry++;
++        if (retry >= 50) {
++            FATAL("Timed out waiting for %s\n", fname);
++        }
++        usleep(10000);  // Wait 10ms between checks
++    }
+ }
+ 
+ /* export the NON-PRU pins: */

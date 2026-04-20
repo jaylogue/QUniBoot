@@ -1,0 +1,4 @@
+config BR2_PACKAGE_QUNIBONE
+    bool "UniBone / QBone Software"
+    help
+      Software for the UniBone / QBone Linux-to-PDP-11 bridge.
