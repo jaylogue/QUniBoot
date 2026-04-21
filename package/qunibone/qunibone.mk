@@ -6,13 +6,29 @@ QUNIBONE_LICENSE_FILES = LICENSE
 
 QUNIBONE_DEPENDENCIES = host-ti-cgt-pru
 
-# 2. Compile the source
+# Choice option
+ifeq ($(BR2_PACKAGE_QUNIBONE_PLATFORM_UNIBUS),y)
+QUNIBONE_PLATFORM=UNIBUS
+QUNIBONE_PLATFORM_SUFFIX=_u
+endif
+
+ifeq ($(BR2_PACKAGE_QUNIBONE_PLATFORM_QBUS),y)
+QUNIBONE_PLATFORM=QBUS
+QUNIBONE_PLATFORM_SUFFIX=_q
+endif
+
+# Boolean option
+ifeq ($(BR2_PACKAGE_QUNIBONE_DEBUG),y)
+QUNIBONE_MAKE_CONFIGURATION=DBG
+else
+QUNIBONE_MAKE_CONFIGURATION=RELEASE
+endif
+
 define QUNIBONE_BUILD_CMDS
     $(TARGET_CONFIGURE_OPTS) \
     QUNIBONE_DIR=$(@D) \
-    QUNIBONE_PLATFORM=UNIBUS \
-    QUNIBONE_PLATFORM_SUFFIX=_u \
-    MAKE_CONFIGURATION=RELEASE \
+    QUNIBONE_PLATFORM=$(QUNIBONE_PLATFORM) \
+    MAKE_CONFIGURATION=$(QUNIBONE_MAKE_CONFIGURATION) \
     MAKE_TARGET_ARCH=BBB \
     BBB_CC="$(TARGET_CC) -I$(STAGING_DIR)/usr/include/tirpc" \
     PRU_CGT=$(HOST_DIR)/usr/share/ti-cgt-pru \
@@ -20,9 +36,8 @@ define QUNIBONE_BUILD_CMDS
     $(MAKE) -C $(@D)/10.03_app_demo/2_src -j1
 endef
 
-# 3. Install to the target rootfs staging area
 define QUNIBONE_INSTALL_TARGET_CMDS
-    $(INSTALL) -D -m 0755 $(@D)/10.03_app_demo/4_deploy_u/demo $(TARGET_DIR)/root/demo
+    $(INSTALL) -D -m 0755 $(@D)/10.03_app_demo/4_deploy$(QUNIBONE_PLATFORM_SUFFIX)/demo $(TARGET_DIR)/root/10.03_app_demo/4_deploy$(QUNIBONE_PLATFORM_SUFFIX)/demo
 endef
 
 $(eval $(generic-package))

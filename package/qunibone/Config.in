@@ -2,3 +2,29 @@ config BR2_PACKAGE_QUNIBONE
     bool "UniBone / QBone Software"
     help
       Software for the UniBone / QBone Linux-to-PDP-11 bridge.
+
+if BR2_PACKAGE_QUNIBONE
+
+choice
+    prompt "QUniBone platform"
+    default BR2_PACKAGE_QUNIBONE_PLATFORM_UNIBUS
+
+config BR2_PACKAGE_QUNIBONE_PLATFORM_UNIBUS
+    bool "UNIBUS"
+    help
+      Build for UNIBUS platform.
+
+config BR2_PACKAGE_QUNIBONE_PLATFORM_QBUS
+    bool "QBus"
+    help
+      Build for QBUS platform.
+
+endchoice
+
+config BR2_PACKAGE_QUNIBONE_DEBUG
+    bool "Enable debug build"
+    default n
+    help
+      Build with debug enabled.
+
+endif
