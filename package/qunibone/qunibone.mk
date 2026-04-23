@@ -37,7 +37,15 @@ define QUNIBONE_BUILD_CMDS
 endef
 
 define QUNIBONE_INSTALL_TARGET_CMDS
-    $(INSTALL) -D -m 0755 $(@D)/10.03_app_demo/4_deploy$(QUNIBONE_PLATFORM_SUFFIX)/demo $(TARGET_DIR)/root/10.03_app_demo/4_deploy$(QUNIBONE_PLATFORM_SUFFIX)/demo
+    @# Install QUniBone executable into /opt/qunibone
+    $(INSTALL) -D -m 0755 $(@D)/10.03_app_demo/4_deploy$(QUNIBONE_PLATFORM_SUFFIX)/demo $(TARGET_DIR)/opt/qunibone/bin/demo
+
+    @# Create symlink to QUniBone executable in 10.03_app_demo/4_deploy
+    $(INSTALL) -d $(TARGET_DIR)/root/10.03_app_demo/4_deploy
+    ln -fs /opt/qunibone/bin/demo $(TARGET_DIR)/root/10.03_app_demo/4_deploy/demo
+
+    @# Install demo.sh script into home directory
+    $(INSTALL) -D -m 0755 $(@D)/demo.sh $(TARGET_DIR)/root/demo.sh
 endef
 
 $(eval $(generic-package))

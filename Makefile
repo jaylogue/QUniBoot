@@ -1,7 +1,7 @@
 TOP_DIR                 := $(abspath $(dir $(firstword $(MAKEFILE_LIST))))
 BUILDROOT_DIR           = $(TOP_DIR)/buildroot
 DOWNLOAD_DIR            = $(TOP_DIR)/dl
-CONFIG_DIR              = $(TOP_DIR)/config
+CONFIG_DIR              = $(TOP_DIR)/configs
 PATCHES_DIR             = $(TOP_DIR)/patches
 OUTPUT_DIR              = $(TOP_DIR)/output
 
@@ -18,7 +18,7 @@ BUILDROOT_MAKE_ARGS     = -C $(BUILDROOT_DIR) \
 .PHONY : download-buildroot stage-buildroot configure-buildroot
 .DEFAULT_GOAL := all
 
-download-buildroot : $(TOP_DIR)/$(BUILDROOT_PACKAGE_FILE)
+download-buildroot : $(DOWNLOAD_DIR)/$(BUILDROOT_PACKAGE_FILE)
 
 $(DOWNLOAD_DIR)/$(BUILDROOT_PACKAGE_FILE) :
 	mkdir -p $(DOWNLOAD_DIR)
