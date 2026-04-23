@@ -1,0 +1,4 @@
+config BR2_PACKAGE_QUNIBONE_OS_IMAGES
+    bool "UniBone / QBone OS Images"
+    help
+      Command scripts and disk images for booting various PDP-11 operating systems.

@@ -1,0 +1,4 @@
+config BR2_PACKAGE_QUNIBONE_BOOT_ROMS
+    bool "PDP-11 boot ROMs"
+    help
+      Boot ROMs for for various PDP-11 peripheral devices, directly loadable by UniBone/QBone.
