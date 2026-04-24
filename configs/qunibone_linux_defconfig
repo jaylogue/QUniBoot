@@ -1,0 +1,30 @@
+# Configuration overrides for linux kernel on QUniBone
+#
+# This file contains overrides to the kernel build configuration
+# for QUniBone.  The overrides are relative to the stock bb.org
+# defconfig that is part of the openbeagle.org beagleboard linux
+# tree. 
+
+# Use GZIP instead of XZ
+CONFIG_KERNEL_GZIP=y
+CONFIG_KERNEL_XZ=n
+
+# Enable UIO PRUSS driver
+CONFIG_UIO=y
+CONFIG_UIO_PRUSS=y
+CONFIG_UIO_PDRV_GENIRQ=y
+
+# Enable PRUSS subsystem
+#CONFIG_PRUSS=y
+#CONFIG_PRUSS_SOC_BUS=y
+#CONFIG_PRUSS_INTC=y
+
+# Enable TI PRUSS 
+CONFIG_TI_PRUSS=y
+CONFIG_TI_PRUSS_INTC=y
+
+# Disable PRU remoteproc (conflicts with UIO PRUSS)
+CONFIG_PRU_REMOTEPROC=n
+
+# Ensure RT scheduling is available
+CONFIG_PREEMPT=y
