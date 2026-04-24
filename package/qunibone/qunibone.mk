@@ -4,7 +4,7 @@ QUNIBONE_VERSION = HEAD
 QUNIBONE_LICENSE = BSD 2-Clause License
 QUNIBONE_LICENSE_FILES = LICENSE
 
-QUNIBONE_DEPENDENCIES = host-ti-cgt-pru
+QUNIBONE_DEPENDENCIES = host-ti-cgt-pru linux
 
 # Choice option
 ifeq ($(BR2_PACKAGE_QUNIBONE_PLATFORM_UNIBUS),y)
@@ -34,6 +34,12 @@ define QUNIBONE_BUILD_CMDS
     PRU_CGT=$(HOST_DIR)/usr/share/ti-cgt-pru \
     LDFLAGS="$(TARGET_LDFLAGS) -L$(STAGING_DIR)/usr/lib -ltirpc" \
     $(MAKE) -C $(@D)/10.03_app_demo/2_src -j1
+
+    @# Compiling QUniBone DTS overlay
+    $(LINUX_DIR)/scripts/dtc/dtc \
+        -@ -I dts -O dtb \
+        -o $(@D)/qunibone.dtbo \
+        $(BR2_EXTERNAL_QUNIBONE_PATH)/package/qunibone/qunibone.dtso
 endef
 
 define QUNIBONE_INSTALL_TARGET_CMDS
@@ -46,6 +52,9 @@ define QUNIBONE_INSTALL_TARGET_CMDS
 
     @# Install demo.sh script into home directory
     $(INSTALL) -D -m 0755 $(@D)/demo.sh $(TARGET_DIR)/root/demo.sh
+
+    @# Install QUniBone DTS overlay into images directory
+    $(INSTALL) -D -m 0644 $(@D)/qunibone.dtbo $(BINARIES_DIR)/qunibone.dtbo
 endef
 
 $(eval $(generic-package))
