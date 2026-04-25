@@ -137,27 +137,18 @@
       };
    };
 
-   // Enable PRUSS
+   // Enable UIO PRUSS
+   // Bind the UIO PRUSS driver to the existing pruss@0 node and 
+   // add necessary config properties.
    fragment@1 {
-      target-path = "/";
+      target = <&pruss>;
       __overlay__ {
-         uio_pruss: uio_pruss {
-               compatible = "ti,pruss-v2";
-               ti,pintc-offset = <0x20000>;
-               reg = <0x4a300000 0x080000>,   /* PRUSS shared RAM + control */
-                     <0x4a326000 0x002000>,   /* PRUSS INTC */
-                     <0x4a324000 0x002000>,   /* PRU0 control */
-                     <0x4a322000 0x002000>,   /* PRU1 control */
-                     <0x4a310000 0x008000>,   /* PRU0 IRAM */
-                     <0x4a318000 0x008000>,   /* PRU1 IRAM */
-                     <0x4a300000 0x002000>,   /* PRU0 DRAM */
-                     <0x4a302000 0x002000>;   /* PRU1 DRAM */
-               interrupt-parent = <&intc>;
-               interrupts = <20 21 22 23 24 25 26 27>;
-               pinctrl-names = "default";
-               pinctrl-0 = <&pru_pru_pins>;   /* apply PRU pin mux here */
-               status = "okay";
-         };
+         compatible = "ti,pruss-v2";
+         ti,pintc-offset = <0x20000>;
+         interrupt-parent = <&intc>;
+         interrupts = <20 21 22 23 24 25 26 27>;
+         pinctrl-names = "default";
+         pinctrl-0 = <&pru_pru_pins>;
       };
    };
 
