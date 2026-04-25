@@ -17,7 +17,6 @@ QUNIBONE_PLATFORM=QBUS
 QUNIBONE_PLATFORM_SUFFIX=_q
 endif
 
-# Boolean option
 ifeq ($(BR2_PACKAGE_QUNIBONE_DEBUG),y)
 QUNIBONE_MAKE_CONFIGURATION=DBG
 else
@@ -25,6 +24,7 @@ QUNIBONE_MAKE_CONFIGURATION=RELEASE
 endif
 
 define QUNIBONE_BUILD_CMDS
+    @# Building QUniBone software
     $(TARGET_CONFIGURE_OPTS) \
     QUNIBONE_DIR=$(@D) \
     QUNIBONE_PLATFORM=$(QUNIBONE_PLATFORM) \
@@ -43,17 +43,17 @@ define QUNIBONE_BUILD_CMDS
 endef
 
 define QUNIBONE_INSTALL_TARGET_CMDS
-    @# Install QUniBone executable into /opt/qunibone
+    @# Installing QUniBone executable into /opt/qunibone/bin
     $(INSTALL) -D -m 0755 $(@D)/10.03_app_demo/4_deploy$(QUNIBONE_PLATFORM_SUFFIX)/demo $(TARGET_DIR)/opt/qunibone/bin/demo
 
-    @# Create symlink to QUniBone executable in 10.03_app_demo/4_deploy
+    @# Creating symlink to QUniBone executable in 10.03_app_demo/4_deploy
     $(INSTALL) -d $(TARGET_DIR)/root/10.03_app_demo/4_deploy
     ln -fs /opt/qunibone/bin/demo $(TARGET_DIR)/root/10.03_app_demo/4_deploy/demo
 
-    @# Install demo.sh script into home directory
+    @# Installing demo.sh script into home directory
     $(INSTALL) -D -m 0755 $(@D)/demo.sh $(TARGET_DIR)/root/demo.sh
 
-    @# Install QUniBone DTS overlay into images directory
+    @# Installing QUniBone DTS overlay into images directory
     $(INSTALL) -D -m 0644 $(@D)/qunibone.dtbo $(BINARIES_DIR)/qunibone.dtbo
 endef
 
