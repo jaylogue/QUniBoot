@@ -216,4 +216,22 @@
       };
    };
 
+   // Disable scanning for secondary cape EEPROMs
+   // This reduces boots time by a small amount.
+   fragment@9 {
+      target = <&i2c2>;
+      __overlay__ {
+         clock-frequency = <400000>;
+
+         cape_eeprom1: cape_eeprom1@55 {
+            status = "disabled";
+         };
+         cape_eeprom2: cape_eeprom2@56 {
+            status = "disabled";
+         };
+         cape_eeprom3: cape_eeprom3@57 {
+            status = "disabled";
+         };
+      };
+   };
 };
