@@ -15,7 +15,7 @@ config BR2_PACKAGE_QUNIBONE_PLATFORM_UNIBUS
       Build for UNIBUS platform.
 
 config BR2_PACKAGE_QUNIBONE_PLATFORM_QBUS
-    bool "QBus"
+    bool "QBUS"
     help
       Build for QBUS platform.
 
