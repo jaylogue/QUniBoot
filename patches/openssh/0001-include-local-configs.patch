@@ -1,0 +1,11 @@
+--- a/sshd_config	2025-02-18 00:15:08.000000000 -0800
++++ b/sshd_config	2026-04-29 15:32:33.168477641 -0700
+@@ -10,6 +10,8 @@
+ # possible, but leave them commented.  Uncommented options override the
+ # default value.
+ 
++Include /etc/ssh/sshd_config.d/*.conf
++
+ #Port 22
+ #AddressFamily any
+ #ListenAddress 0.0.0.0
