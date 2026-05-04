@@ -1,0 +1,28 @@
+# Fix makefile logic for finding libraries so that it supports
+# cross-compilation
+#
+diff a/makefile b/makefile
+--- a/makefile	2026-05-04 11:30:34.619534448 -0700
++++ b/makefile	2026-05-04 12:57:20.356642326 -0700
+@@ -382,7 +382,7 @@
+       ifeq (,${INCPATH})
+         INCPATH:=/usr/include
+       endif
+-      LIBPATH:=/usr/lib
++      LIBPATH:=$(shell ${GCC} -xc /dev/null -E -v 2>&1 | awk -F= '/^LIBRARY_PATH/{gsub(/:/," ",$$2); print $$2}')
+     else
+       $(info *** Warning ***)
+       ifeq (,$(INCLUDES))
+@@ -447,9 +447,9 @@
+             endif
+             LIBPATH += $(LD_LIBRARY_PATH)
+           endif
+-          ifeq (ldconfig,$(shell if ${TEST} -e /sbin/ldconfig; then echo ldconfig; fi))
+-            LIBPATH := $(sort $(foreach lib,$(shell /sbin/ldconfig -p | grep ' => /' | sed 's/^.* => //'),$(dir $(lib))))
+-          endif
++#          ifeq (ldconfig,$(shell if ${TEST} -e /sbin/ldconfig; then echo ldconfig; fi))
++#            LIBPATH := $(sort $(foreach lib,$(shell /sbin/ldconfig -p | grep ' => /' | sed 's/^.* => //'),$(dir $(lib))))
++#          endif
+         endif
+         LIBSOEXT = so
+         LIBEXT = $(LIBSOEXT) a

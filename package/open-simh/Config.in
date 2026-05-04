@@ -1,0 +1,4 @@
+config BR2_PACKAGE_OPEN_SIMH
+    bool "Open SIMH PDP-11"
+    help
+      A Open SIMH simulator for the PDP-11.
