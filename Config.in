@@ -1,3 +1,4 @@
 source "$BR2_EXTERNAL_QUNIBONE_PATH/package/qunibone/Config.in"
 source "$BR2_EXTERNAL_QUNIBONE_PATH/package/qunibone-os-images/Config.in"
 source "$BR2_EXTERNAL_QUNIBONE_PATH/package/qunibone-boot-roms/Config.in"
+source "$BR2_EXTERNAL_QUNIBONE_PATH/package/macro11/Config.in"

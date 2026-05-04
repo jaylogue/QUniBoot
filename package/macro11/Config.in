@@ -1,0 +1,4 @@
+config BR2_PACKAGE_MACRO11
+    bool "MACRO-11"
+    help
+      A MACRO-11 assembler for the PDP-11.
