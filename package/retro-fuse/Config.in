@@ -1,0 +1,4 @@
+config BR2_PACKAGE_RETRO_FUSE
+    bool "retro-fuse"
+    help
+      User-space filesystem (FUSE) for accessing ancient Unix filesystems.
