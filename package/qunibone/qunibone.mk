@@ -24,7 +24,7 @@ QUNIBONE_MAKE_CONFIGURATION=RELEASE
 endif
 
 define QUNIBONE_BUILD_CMDS
-    @# Building QUniBone software
+    @echo Building QUniBone software
     $(TARGET_CONFIGURE_OPTS) \
     QUNIBONE_DIR=$(@D) \
     QUNIBONE_PLATFORM=$(QUNIBONE_PLATFORM) \
@@ -35,7 +35,7 @@ define QUNIBONE_BUILD_CMDS
     LDFLAGS="$(TARGET_LDFLAGS) -L$(STAGING_DIR)/usr/lib -ltirpc" \
     $(MAKE) -C $(@D)/10.03_app_demo/2_src -j1
 
-    @# Compiling QUniBone DTS overlay
+    @echo Compiling QUniBone DTS overlay
     $(LINUX_DIR)/scripts/dtc/dtc \
         -@ -I dts -O dtb \
         -o $(@D)/qunibone.dtbo \
@@ -43,17 +43,17 @@ define QUNIBONE_BUILD_CMDS
 endef
 
 define QUNIBONE_INSTALL_TARGET_CMDS
-    @# Installing QUniBone executable into /opt/qunibone/bin
-    $(INSTALL) -D -m 0755 $(@D)/10.03_app_demo/4_deploy$(QUNIBONE_PLATFORM_SUFFIX)/demo $(TARGET_DIR)/opt/qunibone/bin/demo
+    @echo Installing QUniBone executable into /usr/local/bin
+    $(INSTALL) -D -m 0755 $(@D)/10.03_app_demo/4_deploy$(QUNIBONE_PLATFORM_SUFFIX)/demo $(TARGET_DIR)/usr/local/bin/demo
 
-    @# Creating symlink to QUniBone executable in 10.03_app_demo/4_deploy
+    @echo Creating symlink to QUniBone executable in 10.03_app_demo/4_deploy
     $(INSTALL) -d $(TARGET_DIR)/root/10.03_app_demo/4_deploy
-    ln -fs /opt/qunibone/bin/demo $(TARGET_DIR)/root/10.03_app_demo/4_deploy/demo
+    ln -fs /usr/local/bin/demo $(TARGET_DIR)/root/10.03_app_demo/4_deploy/demo
 
-    @# Installing demo.sh script into home directory
+    @echo Installing demo.sh script into home directory
     $(INSTALL) -D -m 0755 $(@D)/demo.sh $(TARGET_DIR)/root/demo.sh
 
-    @# Installing QUniBone DTS overlay into images directory
+    @echo Installing QUniBone DTS overlay into images directory
     $(INSTALL) -D -m 0644 $(@D)/qunibone.dtbo $(BINARIES_DIR)/qunibone.dtbo
 endef
 
