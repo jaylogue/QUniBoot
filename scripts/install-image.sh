@@ -2,13 +2,50 @@
 
 set -euo pipefail
 
-if [[ $# -ne 1 ]]; then
-  echo "Usage: $0 /dev/sdX"
+IMAGE_TYPE="full"
+
+help() {
+  echo "Usage: sudo $0 [options] /dev/sdX"
+  echo "Options:"
+  echo "  --full"
+  echo "  --os-only"
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    "-h"|"--help")
+      help
+      exit 0
+      ;;
+    "--os-only")
+      IMAGE_TYPE="os-only"
+      shift
+      ;;
+    "--full")
+      IMAGE_TYPE="full"
+      shift
+      ;;
+    -*)
+      echo "Unrecognised option: $1"
+      exit 1
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+if [[ $# -gt 1 ]]; then
+  echo "Unexpected argument: $2"
+  exit 1
+fi
+
+if [[ $# -lt 1 ]]; then
+  echo "Missing device name"
   exit 1
 fi
 
 DEVICE="$1"
-
 if [[ ! -b "$DEVICE" ]]; then
   echo "Error: '$DEVICE' is not a block device."
   exit 1
@@ -36,8 +73,8 @@ umount "${DEVICE}"?* 2>/dev/null || true
 
 # ── Install the SD image ──────────────────────────────────────────────────────
 
-echo "==> Installing SD image"
-${TOP_DIR}/output/host/bin/bmaptool copy ${TOP_DIR}/output/images/sdcard.img "${DEVICE}"
+echo "==> Installing qunibone-${IMAGE_TYPE}.img onto SD card"
+${TOP_DIR}/output/host/bin/bmaptool copy ${TOP_DIR}/output/images/qunibone-${IMAGE_TYPE}.img "${DEVICE}"
 
 # ── Unmount USB ───────────────────────────────────────────────────────────────
 
