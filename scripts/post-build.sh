@@ -40,4 +40,4 @@ sed -i -e "s/label \+qunibone/label ${PLATFORM_NAME_LC}/" ${BINARIES_DIR}/extlin
 
 echo "Customizing genimage.cfg"
 install -m 0644 -D ${BR2_EXTERNAL_QUNIBONE_PATH}/configs/genimage.cfg ${BINARIES_DIR}/genimage.cfg
-sed -i -e "s/label = \"QUNIBONE\"/label = \"${PLATFORM_NAME_UC}\"/" ${BINARIES_DIR}/genimage.cfg
+sed -i -e "s/<%qunibone%>/${PLATFORM_NAME_LC}/; s/<%QUNIBONE%>/${PLATFORM_NAME_UC}/" ${BINARIES_DIR}/genimage.cfg
