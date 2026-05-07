@@ -24,6 +24,12 @@ CONFIG_PRU_REMOTEPROC=n
 # Ensure RT scheduling is available
 CONFIG_PREEMPT=y
 
+# Disable suspend support and initialization of the CM3 co-processor
+CONFIG_SUSPEND=n
+CONFIG_WKUP_M3_RPROC=n
+CONFIG_WKUP_M3_IPC=n
+CONFIG_AMX3_PM=n
+
 # Disable unneeded features to improve boot times
 CONFIG_SECURITY_APPARMOR=n
 CONFIG_SECURITY_YAMA=n
