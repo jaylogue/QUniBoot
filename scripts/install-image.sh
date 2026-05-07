@@ -19,10 +19,12 @@ while [[ $# -gt 0 ]]; do
       ;;
     "--os-only")
       IMAGE_TYPE="os-only"
+      WARNING="BOOT AND ROOTFS PARTITIONS"
       shift
       ;;
     "--full")
       IMAGE_TYPE="full"
+      WARNING="ALL DATA"
       shift
       ;;
     -*)
@@ -62,7 +64,7 @@ TOP_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}/")"/.. && pwd)
 
 echo "==> Target device: $DEVICE"
 lsblk --fs $DEVICE
-echo "==> WARNING: ALL DATA ON $DEVICE WILL BE DESTROYED!"
+echo "==> WARNING: ${WARNING} ON $DEVICE WILL BE DESTROYED!"
 read -rp "    Type YES to continue: " confirm
 [[ "$confirm" == "YES" ]] || { echo "Aborted."; exit 0; }
 
