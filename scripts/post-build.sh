@@ -26,12 +26,6 @@ PLATFORM_NAME_LC=$(echo ${PLATFORM_NAME} | tr '[:upper:]' '[:lower:]')
 echo "Setting hostname"
 echo ${PLATFORM_NAME_LC} > ${TARGET_DIR}/etc/hostname
 
-fgrep -q '/dev/mmcblk0p3' ${TARGET_DIR}/etc/fstab
-if [[ $? -ne 0 ]]; then
-    echo "Adding app filesystem entry to /etc/fstab"
-    echo "/dev/mmcblk0p3	/root		ext4	defaults,noatime	0	2" >> ${TARGET_DIR}/etc/fstab
-fi
-
 if [[ ! -f "${TARGET_DIR}/etc/init.d/DISABLED.S50crond" ]]; then
     echo "Disabling cron"
     mv ${TARGET_DIR}/etc/init.d/S50crond ${TARGET_DIR}/etc/init.d/DISABLED.S50crond

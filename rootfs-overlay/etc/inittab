@@ -1,0 +1,24 @@
+# /etc/inittab
+#
+
+# Startup
+::sysinit:/bin/mount -t proc proc /proc
+::sysinit:/sbin/e2fsck -p /dev/mmcblk0p2
+::sysinit:/bin/mount -o remount,rw,noatime /
+::sysinit:/bin/mkdir -p /dev/pts /dev/shm
+::sysinit:/sbin/fsck -AsRT
+::sysinit:/bin/mount -a
+::sysinit:/bin/mkdir -p /run/lock/subsys
+null::sysinit:/bin/ln -sf /proc/self/fd /dev/fd
+null::sysinit:/bin/ln -sf /proc/self/fd/0 /dev/stdin
+null::sysinit:/bin/ln -sf /proc/self/fd/1 /dev/stdout
+null::sysinit:/bin/ln -sf /proc/self/fd/2 /dev/stderr
+::sysinit:/bin/hostname -F /etc/hostname
+::sysinit:/etc/init.d/rcS
+
+# Shutdown
+::shutdown:/etc/init.d/rcK
+::shutdown:/bin/umount -a -r
+
+# Auto-login the debug serial port (ttyS0)
+console::respawn:/sbin/getty -L -n -l /bin/bash console 115200 linux
