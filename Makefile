@@ -15,7 +15,7 @@ BUILDROOT_MAKE_ARGS     = -C $(BUILDROOT_DIR) \
                           BR2_GLOBAL_PATCH_DIR=$(PATCHES_DIR) \
                           BR2_DL_DIR=$(DOWNLOAD_DIR)
 
-.PHONY : download-buildroot stage-buildroot configure-buildroot
+.PHONY : download-buildroot stage-buildroot configure-buildroot clean-target
 .DEFAULT_GOAL := all
 
 download-buildroot : $(DOWNLOAD_DIR)/$(BUILDROOT_PACKAGE_FILE)
@@ -33,6 +33,9 @@ stage-buildroot $(BUILDROOT_DIR) :
 
 configure-buildroot $(OUTPUT_DIR)/.config : $(BUILDROOT_DIR)
 	$(MAKE) $(BUILDROOT_MAKE_ARGS) qunibone_defconfig
+
+clean-target:
+	rm -rf $(OUTPUT_DIR)/target $(OUTPUT_DIR)/build/*/.stamp_target_installed
 
 all: $(OUTPUT_DIR)/.config
 	$(MAKE) $(BUILDROOT_MAKE_ARGS) all
