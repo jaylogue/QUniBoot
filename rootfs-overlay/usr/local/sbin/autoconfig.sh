@@ -1,0 +1,236 @@
+#!/bin/bash
+#
+# Auto-configuration script for QUniBoot system.
+#
+# Usage:
+#     autoconfig.sh <config-file>
+#
+# Config file syntax:
+#
+#     hostname=<string>
+#         -- Set the system hostname
+#
+#     ip_addr=<XXX.XXX.XXX.XXX>, or
+#     ip_addr=DHCP
+#         -- Set the system IPv4 address, or configure the system to
+#            use DHCP to acquire an IP address.
+#
+#     netmask=<XXX.XXX.XXX.XXX>
+#         -- Set the IPv4 netmask. Ignored if ip_addr=DHCP
+#
+#     gateway=<XXX.XXX.XXX.XXX>
+#         -- Set the primary IPv4 gateway. Ignored if ip_addr=DHCP
+#
+#     nameserver=<XXX.XXX.XXX.XXX>
+#         -- Set the primary nameserver address. Ignored if ip_addr=DHCP
+#
+#     root_password=<string>
+#         -- Set the password for the root user.
+#
+#     root_authorized_key=<ssh-pub-key>, or
+#     root_authorized_key=CLEAR
+#         -- Add the given SSH public key to the root user's authorized_keys
+#            file, if it doesn't already exist in the file, or clear (delete)
+#            root's authorized_keys file.
+#
+# Exit Codes:
+#    0  -- System configuration successfully updated
+#    1  -- No changes made to system configuration
+#   -1  -- Error
+#
+
+NET_IF=eth0
+
+write_interfaces_dhcp() {
+    cat >/etc/network/interfaces <<-EOF
+		# Network interface configuration
+		#
+		auto lo
+		iface lo inet loopback
+
+		auto ${NET_IF}
+		iface ${NET_IF} inet dhcp
+		    hostname \$(hostname)
+		EOF
+}
+
+write_interfaces_static() {
+    cat >/etc/network/interfaces <<-EOF
+		# Network interface configuration
+		#
+		auto lo
+		iface lo inet loopback
+
+		auto ${NET_IF}
+		iface ${NET_IF} inet static
+		    address ${CFG_ip_addr}
+		EOF
+
+    if [[ -n "${CFG_netmask}" ]]; then
+        echo "    netmask ${CFG_netmask}" >>/etc/network/interfaces
+    fi
+
+    if [[ -n "${CFG_gateway}" ]]; then
+        echo "    gateway ${CFG_gateway}" >>/etc/network/interfaces
+    fi
+}
+
+# ------- Main Code -------------------------------
+
+if [[ $# -lt 1 ]]; then
+    echo "Usage: autoconfig.sh <autoconfig-settings-file>"
+    exit -1
+fi
+AUTOCONFIG_FILE="$1"
+shift
+
+if [[ $# -gt 0 ]]; then
+    echo "Unexpected argument: $1"
+    exit -1
+fi
+
+# Confirm the autoconfig.txt file exists and can be read
+if [[ ! -f "${AUTOCONFIG_FILE}" ]]; then
+    echo "Error: File not found: ${AUTOCONFIG_FILE}"
+    exit -1
+fi
+if [[ ! -r "${AUTOCONFIG_FILE}" ]]; then
+    echo "ERROR: Unable to read ${AUTOCONFIG_FILE}"
+    exit -1
+fi
+
+echo "Reading ${AUTOCONFIG_FILE}"
+
+# Parse autoconfig file
+while IFS= read -r line || [[ -n "$line" ]]; do
+
+    # Strip leading whitespace and skip comments and blank lines
+    line="${line#"${line%%[! ]*}"}"
+    case "$line" in
+        '#'*|'') continue ;;
+    esac
+
+    # Split on first '=' only
+    name="${line%%=*}"
+    value="${line#*=}"
+
+    # Strip trailing whitespace from name, leading whitespace from value
+    name="${name%"${name##*[! ]}"}"
+    value="${value#"${value%%[! ]*}"}"
+
+    # Save valid config values as environment variables
+    case "${name}" in
+    hostname|ip_addr|netmask|gateway|nameserver)
+        echo "  ${name}=${value}"
+        export CFG_${name}="${value}"
+        ;;
+    root_authorized_key)
+        echo "  ${name}=${value}"
+        if [[ "${value}" = "CLEAR" || "${value}" = "clear" ]]; then
+            CFG_clear_root_authorized_keys=1
+        else
+            CFG_root_authorized_key="${value}"
+        fi
+        ;;
+    root_password)
+        echo "  ${name}=***"
+        export CFG_${name}="${value}"
+        ;;
+    *)
+        echo "  ERROR: Unknown setting in autoconfig.txt: '${name}=${value}'"
+        exit -1
+    esac
+
+done < "${AUTOCONFIG_FILE}"
+
+RESULT=1 # No changes made
+
+# Configure hostname
+if [[ -n "${CFG_hostname}" ]]; then
+    if [[ -f /etc/hostname ]]; then
+        echo "Saving existing /etc/hostname as /etc/hostname.orig"
+        mv /etc/hostname /etc/hostname.orig
+    fi
+    echo "Setting hostname to '${CFG_hostname}'"
+    echo "${CFG_hostname}" > /etc/hostname
+    hostname "${CFG_hostname}"
+    RESULT=0
+fi
+
+# Configure network interface
+if [[ -n "${CFG_ip_addr}" ]]; then
+    if [[ -f /etc/network/interfaces ]]; then
+        echo "Saving existing /etc/network/interfaces as /etc/network/interfaces.orig"
+        mv /etc/network/interfaces /etc/network/interfaces.orig
+    fi
+    if [[ "${CFG_ip_addr}" = "DHCP" ]] || [[ "${CFG_ip_addr}" = "dhcp" ]]; then
+        echo "Configuring ${NET_IF} for DHCP"
+        write_interfaces_dhcp
+    else
+        echo "Configuring ${NET_IF} for static address"
+        write_interfaces_static
+    fi
+    RESULT=0
+fi
+
+# Configure nameserver address
+if [[ -n "${CFG_nameserver}" ]]; then
+    if [[ -f /etc/resolv.conf ]]; then
+        echo "Saving existing /etc/resolv.conf as /etc/resolv.conf.orig"
+        mv /etc/resolv.conf /etc/resolv.conf.orig
+    fi
+    echo "Configuring nameserver"
+    echo "nameserver ${CFG_nameserver}" > /etc/resolv.conf
+    RESULT=0
+fi
+
+# Set root password
+if [ -n "${CFG_root_password}" ]; then
+    echo "Setting root password"
+    pw_hash=$(echo "${CFG_root_password}" | mkpasswd -m sha-512 -s)
+    sed -i "s|^root:[^:]*:|root:${pw_hash}:|" /etc/shadow
+    RESULT=0
+fi
+
+# Clear root authorized_keys file
+if [[ ${CFG_clear_root_authorized_keys} -eq 1 ]]; then
+    if [[ -f /root/.ssh/authorized_keys ]]; then
+        echo "Saving existing /root/.ssh/authorized_keys as /root/.ssh/authorized_keys.orig"
+        echo "Removing /root/.ssh/authorized_keys"
+        mv /root/.ssh/authorized_keys /root/.ssh/authorized_keys.orig
+        AUTHORIZED_KEYS_UPDATED=1
+        RESULT=0
+    fi
+fi
+
+# Add root authorized key
+if [[ -n "${CFG_root_authorized_key}" ]]; then
+    if ! grep -q -s -F "${CFG_root_authorized_key}" /root/.ssh/authorized_keys; then
+        echo "Adding SSH key to root authorized_keys"
+        mkdir -p -m 700 /root/.ssh
+        (umask 0077; echo "${CFG_root_authorized_key}" >> /root/.ssh/authorized_keys)
+        AUTHORIZED_KEYS_UPDATED=1
+        RESULT=0
+    else
+        echo "SSH key already present in root authorized_keys"
+    fi
+fi
+
+# If an authorized_keys file exists for root, disable SSH login for root using
+# a password (since users can now login via public key). Conversely, re-enable
+# root password login if there is no authorized_keys file.
+if [[ ${AUTHORIZED_KEYS_UPDATED} -eq 1 ]]; then
+    if [[ -f /root/.ssh/authorized_keys ]]; then
+        echo "Disabling use of password to login as root over SSH"
+        sed -i -e 's/PermitRootLogin .\+/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config.d/00-local.conf
+    else
+        echo "Re-enabling use of password to login as root over SSH"
+        sed -i -e 's/PermitRootLogin .\+/PermitRootLogin yes/' /etc/ssh/sshd_config.d/00-local.conf
+    fi
+fi
+
+if [[ ${RESULT} -eq 1 ]]; then
+    echo "No configuration changes made"
+fi
+
+exit ${RESULT}

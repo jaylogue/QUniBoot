@@ -38,6 +38,5 @@ echo "Customizing extlinux.conf"
 install -m 0644 -D ${BR2_EXTERNAL_QUNIBONE_PATH}/configs/extlinux.conf ${BINARIES_DIR}/extlinux/extlinux.conf
 sed -i -e "s/label \+qunibone/label ${PLATFORM_NAME_LC}/" ${BINARIES_DIR}/extlinux/extlinux.conf
 
-echo "Customizing genimage.cfg"
-install -m 0644 -D ${BR2_EXTERNAL_QUNIBONE_PATH}/configs/genimage.cfg ${BINARIES_DIR}/genimage.cfg
-sed -i -e "s/<%qunibone%>/${PLATFORM_NAME_LC}/; s/<%QUNIBONE%>/${PLATFORM_NAME_UC}/" ${BINARIES_DIR}/genimage.cfg
+echo "Installing autoconfig-example.txt"
+install -m 0644 -D ${BR2_EXTERNAL_QUNIBONE_PATH}/configs/autoconfig-example.txt ${BINARIES_DIR}/autoconfig-example.txt
