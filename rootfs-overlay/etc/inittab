@@ -19,5 +19,8 @@ null::sysinit:/bin/ln -sf /proc/self/fd/2 /dev/stderr
 ::shutdown:/etc/init.d/rcK
 ::shutdown:/bin/umount -a -r
 
-# Auto-login the debug serial port (ttyS0)
+# Auto-login as root on the console port (debug serial connector)
 console::respawn:/sbin/getty -L -n -l /bin/bash console 115200 linux
+
+# Enable login on USB client port (miniUSB connector)
+ttyGS0::respawn:/sbin/getty -L ttyGS0 115200 vt100
