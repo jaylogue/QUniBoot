@@ -1,13 +1,22 @@
 #!/bin/bash
+#
+# Post-fakeroot script
+#
+# This script is invoked immediately prior to root filesystem image generation,
+# within the context of a fakeroot(1) environment. Its purpose is to segregate
+# the files that go into the app filesystem (essentially, everything in the root
+# home directory) and generate the app filesystem image itself. After this is
+# done, the normal BuildRoot process generates the root filesystem from the
+# remaining files.
+# 
+
+# NOTE: The app fs partition is sized to just fit the existing qunibone app
+# data files. This minimizes the final SD card image size, and therefore the
+# associated write time. On first boot, the partition is automatically expanded
+# to fill available space on the user's SD card.
+APP_FS_SIZE=512M
 
 APP_TARGET_DIR=$(realpath "${TARGET_DIR}/../app-target")
-
-# NOTE: The app fs partition is sized to just fit the existing
-# qunibone app data files. This minimizes the final SD card image
-# size, and therefore the associated write time. On first boot,
-# the partition will be expanded to fill available space on the
-# chosen SD card.
-APP_FS_SIZE=512M
 
 echo "Generating app-target directory"
 mkdir -p ${APP_TARGET_DIR}
