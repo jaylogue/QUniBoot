@@ -32,7 +32,10 @@ if [[ ! -f "${TARGET_DIR}/etc/init.d/DISABLED.S50crond" ]]; then
 fi
 
 echo "Customizing welcome message"
-echo "Wecome to ${PLATFORM_NAME}" > ${TARGET_DIR}/etc/issue
+cat > ${TARGET_DIR}/etc/issue <<EOF
+Welcome to ${PLATFORM_NAME}
+
+EOF
 
 echo "Customizing extlinux.conf"
 install -m 0644 -D ${BR2_EXTERNAL_QUNIBONE_PATH}/configs/extlinux.conf ${BINARIES_DIR}/extlinux/extlinux.conf
