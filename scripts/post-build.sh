@@ -31,6 +31,11 @@ if [[ ! -f "${TARGET_DIR}/etc/init.d/DISABLED.S50crond" ]]; then
     mv ${TARGET_DIR}/etc/init.d/S50crond ${TARGET_DIR}/etc/init.d/DISABLED.S50crond
 fi
 
+if [[ ! -f "${TARGET_DIR}/etc/init.d/DISABLED.S50telnet" ]]; then
+    echo "Disabling telnetd"
+    mv ${TARGET_DIR}/etc/init.d/S50telnet ${TARGET_DIR}/etc/init.d/DISABLED.S50telnet
+fi
+
 echo "Customizing welcome message"
 cat > ${TARGET_DIR}/etc/issue <<EOF
 Welcome to ${PLATFORM_NAME}
