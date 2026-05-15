@@ -46,8 +46,20 @@
 #
 # This has no effect if the key already exists in the authorized_keys file.
 #
-root_authorized_key=<base64-pub-key>
+#root_authorized_key=<base64-pub-key>
 
 # Clear (delete) the root user's authorized_keys file
 #
 #root_authorized_key=CLEAR
+
+# Install SSH host key files
+#
+# Key files must be located in the same directory as the autoconfig.txt
+# file and should be named ssh_host_*_key and ssh_host_*_key.pub (e.g.
+# ssh_host_rsa_key, ssh_host_rsa_key.pub). Existing key files on the
+# system, if any, are preserved as .orig files.
+#
+# This setting has no effect if the contents of the new files are the same
+# as the files already installed on the system.
+#
+#install_host_keys=TRUE

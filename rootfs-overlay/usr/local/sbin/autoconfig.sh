@@ -33,6 +33,10 @@
 #            file, if it doesn't already exist in the file, or clear (delete)
 #            root's authorized_keys file.
 #
+#     install_host_keys=TRUE
+#         -- Install SSH host key files located in the same directory as the
+#            config file. Key files must match the pattern ssh_host_*_key(.pub).
+#
 # Exit Codes:
 #    0  -- System configuration successfully updated
 #    1  -- No changes made to system configuration
@@ -138,6 +142,10 @@ while IFS= read -r line || [[ -n "$line" ]]; do
         echo "  ${name}=***"
         export CFG_${name}="${value}"
         ;;
+    install_host_key|install_host_keys)
+        echo "  ${name}=${value}"
+        export CFG_install_host_keys="${value}"
+        ;;
     *)
         echo "  ERROR: Unknown setting in autoconfig.txt: '${name}=${value}'"
         exit -1
@@ -228,6 +236,29 @@ if [[ ${AUTHORIZED_KEYS_UPDATED} -eq 1 ]]; then
         echo "Re-enabling use of password to login as root over SSH"
         sed -i -e 's/PermitRootLogin .\+/PermitRootLogin yes/' /etc/ssh/sshd_config.d/00-local.conf
     fi
+fi
+
+# Install host key files
+if [[ "${CFG_install_host_keys}" = "true" || "${CFG_install_host_keys}" = "TRUE" ]]; then
+    AUTOCONFIG_DIR=$(dirname $(readlink -f ${AUTOCONFIG_FILE}))
+    KEY_FILES=$(find ${AUTOCONFIG_DIR} -type f \( -name 'ssh_host_*_key' -o -name 'ssh_host_*_key.pub' \) -printf '%f ')
+    for KEY_FILE in ${KEY_FILES}; do
+        if [[ -f "/etc/ssh/${KEY_FILE}" ]]; then
+            if cmp -s "${AUTOCONFIG_DIR}/${KEY_FILE}" "/etc/ssh/${KEY_FILE}"; then
+                continue
+            fi
+            echo "Saving existing SSH host key file /etc/ssh/${KEY_FILE} as /etc/ssh/${KEY_FILE}.orig"
+            mv "/etc/ssh/${KEY_FILE}" "/etc/ssh/${KEY_FILE}.orig"
+        fi
+        echo "Installing SSH host key file ${KEY_FILE}"
+        cp "${AUTOCONFIG_DIR}/${KEY_FILE}" "/etc/ssh/${KEY_FILE}"
+        if [[ "${KEY_FILE}" =~ .pub$ ]]; then
+            chmod 644 "/etc/ssh/${KEY_FILE}"
+        else
+            chmod 600 "/etc/ssh/${KEY_FILE}"
+        fi
+        RESULT=0
+    done
 fi
 
 if [[ ${RESULT} -eq 1 ]]; then
