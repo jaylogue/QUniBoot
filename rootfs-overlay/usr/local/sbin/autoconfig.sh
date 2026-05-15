@@ -7,33 +7,33 @@
 #
 # Config file syntax:
 #
-#     hostname=<string>
+#     HOSTNAME=<string>
 #         -- Set the system hostname
 #
-#     ip_addr=<XXX.XXX.XXX.XXX>, or
-#     ip_addr=DHCP
+#     IP_ADDR=<XXX.XXX.XXX.XXX>, or
+#     IP_ADDR=DHCP
 #         -- Set the system IPv4 address, or configure the system to
 #            use DHCP to acquire an IP address.
 #
-#     netmask=<XXX.XXX.XXX.XXX>
+#     NETMASK=<XXX.XXX.XXX.XXX>
 #         -- Set the IPv4 netmask. Ignored if ip_addr=DHCP
 #
-#     gateway=<XXX.XXX.XXX.XXX>
+#     GATEWAY=<XXX.XXX.XXX.XXX>
 #         -- Set the primary IPv4 gateway. Ignored if ip_addr=DHCP
 #
-#     nameserver=<XXX.XXX.XXX.XXX>
+#     NAMESERVER=<XXX.XXX.XXX.XXX>
 #         -- Set the primary nameserver address. Ignored if ip_addr=DHCP
 #
-#     root_password=<string>
+#     ROOT_PASSWORD=<string>
 #         -- Set the password for the root user.
 #
-#     root_authorized_key=<ssh-pub-key>, or
-#     root_authorized_key=CLEAR
+#     ROOT_AUTHORIZED_KEY=<ssh-pub-key>, or
+#     ROOT_AUTHORIZED_KEY=CLEAR
 #         -- Add the given SSH public key to the root user's authorized_keys
 #            file, if it doesn't already exist in the file, or clear (delete)
 #            root's authorized_keys file.
 #
-#     install_host_keys=TRUE
+#     INSTALL_HOST_KEYS=TRUE
 #         -- Install SSH host key files located in the same directory as the
 #            config file. Key files must match the pattern ssh_host_*_key(.pub).
 #
@@ -57,7 +57,7 @@ iface lo inet loopback
 
 auto ${NET_IF}
 "
-    if [[ "${CFG_ip_addr}" = "DHCP" ]] || [[ "${CFG_ip_addr}" = "dhcp" ]]; then
+    if [[ "${CFG_IP_ADDR}" = "DHCP" ]] || [[ "${CFG_IP_ADDR}" = "dhcp" ]]; then
         echo -n "\
 iface ${NET_IF} inet dhcp
     hostname \$(hostname)
@@ -65,12 +65,12 @@ iface ${NET_IF} inet dhcp
     else
         echo -n "\
 iface ${NET_IF} inet static
-    address ${CFG_ip_addr}
-    netmask ${CFG_netmask}
+    address ${CFG_IP_ADDR}
+    netmask ${CFG_NETMASK}
 "
-        if [[ -n "${CFG_gateway}" ]]; then
+        if [[ -n "${CFG_GATEWAY}" ]]; then
             echo -n "\
-    gateway ${CFG_gateway}
+    gateway ${CFG_GATEWAY}
 "
         fi
     fi
@@ -124,27 +124,30 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     name="${name%"${name##*[! ]}"}"
     value="${value#"${value%%[! ]*}"}"
 
+    # name to uppercase
+    name=$(echo ${name} | tr '[:lower:]' '[:upper:]')
+
     # Save valid config values as environment variables
     case "${name}" in
-    hostname|ip_addr|netmask|gateway|nameserver)
+    HOSTNAME|IP_ADDR|NETMASK|GATEWAY|NAMESERVER)
         echo "  ${name}=${value}"
         export CFG_${name}="${value}"
         ;;
-    root_authorized_key)
+    ROOT_AUTHORIZED_KEY)
         echo "  ${name}=${value}"
         if [[ "${value}" = "CLEAR" || "${value}" = "clear" ]]; then
-            CFG_clear_root_authorized_keys=1
+            CFG_CLEAR_ROOT_AUTHORIZED_KEYS=1
         else
-            CFG_root_authorized_key="${value}"
+            CFG_ROOT_AUTHORIZED_KEY="${value}"
         fi
         ;;
-    root_password)
+    ROOT_PASSWORD)
         echo "  ${name}=***"
         export CFG_${name}="${value}"
         ;;
-    install_host_key|install_host_keys)
+    INSTALL_HOST_KEY|INSTALL_HOST_KEYS)
         echo "  ${name}=${value}"
-        export CFG_install_host_keys="${value}"
+        export CFG_INSTALL_HOST_KEYS="${value}"
         ;;
     *)
         echo "  ERROR: Unknown setting in autoconfig.txt: '${name}=${value}'"
@@ -156,53 +159,77 @@ done < "${AUTOCONFIG_FILE}"
 RESULT=1 # No changes made
 
 # Configure hostname
-if [[ -n "${CFG_hostname}" ]]; then
+if [[ -n "${CFG_HOSTNAME}" ]]; then
+    echo "${CFG_HOSTNAME}" > /tmp/hostname.new
     if [[ -f /etc/hostname ]]; then
-        echo "Saving existing /etc/hostname as /etc/hostname.orig"
-        mv /etc/hostname /etc/hostname.orig
+        if ! cmp -s /etc/hostname /tmp/hostname.new; then
+            echo "Saving existing /etc/hostname as /etc/hostname.orig"
+            mv /etc/hostname /etc/hostname.orig
+        else
+            echo "hostname already set"
+            rm /tmp/hostname.new
+        fi
     fi
-    echo "Setting hostname to '${CFG_hostname}'"
-    echo "${CFG_hostname}" > /etc/hostname
-    hostname "${CFG_hostname}"
-    RESULT=0
+    if [[ -f /tmp/hostname.new ]]; then
+        echo "Setting hostname to '${CFG_HOSTNAME}'"
+        mv /tmp/hostname.new /etc/hostname
+        hostname "${CFG_HOSTNAME}"
+        RESULT=0
+    fi
 fi
 
 # Configure network interface
-if [[ -n "${CFG_ip_addr}" ]]; then
+if [[ -n "${CFG_IP_ADDR}" ]]; then
+    echo "$(gen_interfaces)" > /tmp/interfaces.new
     if [[ -f /etc/network/interfaces ]]; then
-        echo "Saving existing /etc/network/interfaces as /etc/network/interfaces.orig"
-        mv /etc/network/interfaces /etc/network/interfaces.orig
+        if ! cmp -s /etc/network/interfaces /tmp/interfaces.new; then
+            echo "Saving existing /etc/network/interfaces as /etc/network/interfaces.orig"
+            mv /etc/network/interfaces /etc/network/interfaces.orig
+        else
+            echo "${NET_IF} already configured"
+            rm /tmp/interfaces.new
+        fi
     fi
-    if [[ "${CFG_ip_addr}" = "DHCP" ]] || [[ "${CFG_ip_addr}" = "dhcp" ]]; then
-        echo "Configuring ${NET_IF} for DHCP"
-    else
-        echo "Configuring ${NET_IF} for static IP address"
+    if [[ -f /tmp/interfaces.new ]]; then
+        if [[ "${CFG_IP_ADDR}" = "DHCP" ]] || [[ "${CFG_IP_ADDR}" = "dhcp" ]]; then
+            echo "Configuring ${NET_IF} for DHCP"
+        else
+            echo "Configuring ${NET_IF} for static IP address"
+        fi
+        mv /tmp/interfaces.new /etc/network/interfaces
+        RESULT=0
     fi
-    echo "$(gen_interfaces)" > /etc/network/interfaces
-    RESULT=0
 fi
 
 # Configure nameserver address
-if [[ -n "${CFG_nameserver}" ]]; then
+if [[ -n "${CFG_NAMESERVER}" ]]; then
+    echo "nameserver ${CFG_NAMESERVER} # eth0" > /tmp/resolv.conf.new
     if [[ -f /etc/resolv.conf ]]; then
-        echo "Saving existing /etc/resolv.conf as /etc/resolv.conf.orig"
-        mv /etc/resolv.conf /etc/resolv.conf.orig
+        if ! cmp -s /etc/resolv.conf /tmp/resolv.conf.new; then
+            echo "Saving existing /etc/resolv.conf as /etc/resolv.conf.orig"
+            mv /etc/resolv.conf /etc/resolv.conf.orig
+        else
+            echo "Nameserver already configured"
+            rm /tmp/resolv.conf.new
+        fi
     fi
-    echo "Configuring nameserver"
-    echo "nameserver ${CFG_nameserver}" > /etc/resolv.conf
-    RESULT=0
+    if [[ -f /tmp/resolv.conf.new ]]; then
+        echo "Configuring nameserver"
+        mv /tmp/resolv.conf.new /etc/resolv.conf
+        RESULT=0
+    fi
 fi
 
 # Set root password
-if [ -n "${CFG_root_password}" ]; then
+if [ -n "${CFG_ROOT_PASSWORD}" ]; then
     echo "Setting root password"
-    pw_hash=$(echo "${CFG_root_password}" | mkpasswd -m sha-512 -s)
-    sed -i "s|^root:[^:]*:|root:${pw_hash}:|" /etc/shadow
+    PW_HASH=$(echo "${CFG_ROOT_PASSWORD}" | mkpasswd -m sha-512 -s)
+    sed -i "s|^root:[^:]*:|root:${PW_HASH}:|" /etc/shadow
     RESULT=0
 fi
 
 # Clear root authorized_keys file
-if [[ ${CFG_clear_root_authorized_keys} -eq 1 ]]; then
+if [[ ${CFG_CLEAR_ROOT_AUTHORIZED_KEYS} -eq 1 ]]; then
     if [[ -f /root/.ssh/authorized_keys ]]; then
         echo "Saving existing /root/.ssh/authorized_keys as /root/.ssh/authorized_keys.orig"
         echo "Removing /root/.ssh/authorized_keys"
@@ -213,11 +240,11 @@ if [[ ${CFG_clear_root_authorized_keys} -eq 1 ]]; then
 fi
 
 # Add root authorized key
-if [[ -n "${CFG_root_authorized_key}" ]]; then
-    if ! grep -q -s -F "${CFG_root_authorized_key}" /root/.ssh/authorized_keys; then
+if [[ -n "${CFG_ROOT_AUTHORIZED_KEY}" ]]; then
+    if ! grep -q -s -F "${CFG_ROOT_AUTHORIZED_KEY}" /root/.ssh/authorized_keys; then
         echo "Adding SSH key to root authorized_keys"
         mkdir -p -m 700 /root/.ssh
-        (umask 0077; echo "${CFG_root_authorized_key}" >> /root/.ssh/authorized_keys)
+        (umask 0077; echo "${CFG_ROOT_AUTHORIZED_KEY}" >> /root/.ssh/authorized_keys)
         AUTHORIZED_KEYS_UPDATED=1
         RESULT=0
     else
@@ -239,7 +266,7 @@ if [[ ${AUTHORIZED_KEYS_UPDATED} -eq 1 ]]; then
 fi
 
 # Install host key files
-if [[ "${CFG_install_host_keys}" = "true" || "${CFG_install_host_keys}" = "TRUE" ]]; then
+if [[ "${CFG_INSTALL_HOST_KEYS}" = "true" || "${CFG_INSTALL_HOST_KEYS}" = "TRUE" ]]; then
     AUTOCONFIG_DIR=$(dirname $(readlink -f ${AUTOCONFIG_FILE}))
     KEY_FILES=$(find ${AUTOCONFIG_DIR} -type f \( -name 'ssh_host_*_key' -o -name 'ssh_host_*_key.pub' \) -printf '%f ')
     for KEY_FILE in ${KEY_FILES}; do

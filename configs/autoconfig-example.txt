@@ -19,7 +19,8 @@
 #
 
 # Set the system hostname
-#hostname=<string>
+#
+#HOSTNAME=<string>
 
 # Configure the system to use a static IPv4 address, netmask, gateway
 # and DNS server.
@@ -27,20 +28,20 @@
 # Note that CIDR notation (e.g. XXX.XXX.XXX.XXX/24) CANNOT be used in
 # the ip_addr setting. Use netmask instead.
 #
-#ip_addr=<XXX.XXX.XXX.XXX>
-#netmask=<XXX.XXX.XXX.XXX>
-#gateway=<XXX.XXX.XXX.XXX>
-#nameserver=<XXX.XXX.XXX.XXX>
+#IP_ADDR=<XXX.XXX.XXX.XXX>
+#NETMASK=<XXX.XXX.XXX.XXX>
+#GATEWAY=<XXX.XXX.XXX.XXX>
+#NAMESERVER=<XXX.XXX.XXX.XXX>
 
 # Configure the system to use DHCP to acquire network configuration.
 #
 # This is the default, but enabling this line will reset an existing
 # static IP address configuration back to using DHCP.
 #
-#ip_addr=DHCP
+#IP_ADDR=DHCP
 
 # Set the password for the root user.
-#root_password=<string>
+#ROOT_PASSWORD=<string>
 
 # Add the given SSH public key to the root user's authorized_keys file
 #
@@ -50,7 +51,7 @@
 
 # Clear (delete) the root user's authorized_keys file
 #
-#root_authorized_key=CLEAR
+#ROOT_AUTHORIZED_KEY=CLEAR
 
 # Install SSH host key files
 #
@@ -62,4 +63,4 @@
 # This setting has no effect if the contents of the new files are the same
 # as the files already installed on the system.
 #
-#install_host_keys=TRUE
+#INSTALL_HOST_KEYS=TRUE
