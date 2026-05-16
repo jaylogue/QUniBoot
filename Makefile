@@ -5,7 +5,7 @@ CONFIG_DIR              = $(TOP_DIR)/configs
 PATCHES_DIR             = $(TOP_DIR)/patches
 OUTPUT_DIR              = $(TOP_DIR)/output
 
-BUILDROOT_PACKAGE_URL   = https://buildroot.org/downloads/buildroot-2025.02.12.tar.xz
+BUILDROOT_PACKAGE_URL   = https://buildroot.org/downloads/buildroot-2025.02.13.tar.xz
 BUILDROOT_PACKAGE_FILE  = $(shell basename $(BUILDROOT_PACKAGE_URL))
 
 BUILDROOT_MAKE_ARGS     = -C $(BUILDROOT_DIR) \
