@@ -14,7 +14,7 @@
 # data files. This minimizes the final SD card image size, and therefore the
 # associated write time. On first boot, the partition is automatically expanded
 # to fill available space on the user's SD card.
-APP_FS_SIZE=512M
+APP_FS_SIZE=576M
 
 APP_TARGET_DIR=$(realpath "${TARGET_DIR}/../app-target")
 
