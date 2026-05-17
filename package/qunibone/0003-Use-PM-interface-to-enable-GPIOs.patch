@@ -1,0 +1,110 @@
+From 45c22e7fffe7790c76598babbf3047c4b9b8599b Mon Sep 17 00:00:00 2001
+From: Jay Logue <jay.logue@gmail.com>
+Date: Fri, 24 Apr 2026 13:01:32 -0700
+Subject: [PATCH] Use PM interface to enable GPIOs
+
+-- Switch to using the sysfs device power management interface to
+enable the AM335x GPIO banks. This avoids using the legacy sysfs
+GPIO interface (/sys/class/gpio/gpioXXX) which has changed behavior
+in an incompatible way in later kernels.
+
+Note that this eliminates entirely the activity of exporting the
+individual non-PRU GPIOs, which wasn't strictly necessary since all
+GPIO interactions are done through direct register access.
+---
+ 10.01_base/2_src/arm/gpios.cpp | 42 ++++++++++++++--------------------
+ 10.01_base/2_src/arm/gpios.hpp |  2 +-
+ 2 files changed, 18 insertions(+), 26 deletions(-)
+
+diff --git a/10.01_base/2_src/arm/gpios.cpp b/10.01_base/2_src/arm/gpios.cpp
+index 0d602e1..1c0d2c1 100644
+--- a/10.01_base/2_src/arm/gpios.cpp
++++ b/10.01_base/2_src/arm/gpios.cpp
+@@ -33,6 +33,7 @@
+ #include <time.h>
+ #include <assert.h>
+ #include <fcntl.h>
++#include <unistd.h>
+ #include <sys/mman.h>
+ #include <sys/stat.h>
+ 
+@@ -126,34 +127,31 @@ gpio_config_t *gpios_c::config(const char *name, int direction, unsigned bank_id
+     return result;
+ }
+ 
+-// "export" a pin over the sys file system
+-// this is necessary for GPIO2&3, despite we operate memory mapped.
+-void gpios_c::export_pin(gpio_config_t *pin)
++void gpios_c::enable_gpio_device(unsigned start_addr)
+ {
+     char fname[256];
+-    FILE *f;
+-    struct stat statbuff;
+-
+-    sprintf(fname, "/sys/class/gpio/export");
+-    f = fopen(fname, "w");
+-    if (!f)
+-        FATAL("Can not open %s", fname);
+-    fprintf(f, "%d\n", pin->linear_no);
+-    fclose(f);
+-
+-    // verify: now there should appear the control directory for the pin
+-    sprintf(fname, "/sys/class/gpio/gpio%d", pin->linear_no);
+-    if (stat(fname, &statbuff) != 0 || !S_ISDIR(statbuff.st_mode))
+-        FATAL("Gpio control dir %s not generated", fname);
+-
++    int f;
++
++    // Force the power state for the specified GPIO bank to the "on" state.
++    snprintf(fname, sizeof(fname), "/sys/bus/platform/devices/%08x.gpio/power/control", start_addr);
++    f = open(fname, O_WRONLY);
++    if (f < 0)
++        FATAL("Cannot open GPIO device %s: %d\n", fname, errno);
++    write(f, "on", 2);
++    close(f);
+ }
+ 
+-/* export the NON-PRU pins: */
++/* enable and configure the NON-PRU pins: */
+ void gpios_c::init()
+ {
+     unsigned n;
+     gpio_config_t *gpio;
+ 
++    enable_gpio_device(GPIO0_START_ADDR);
++    enable_gpio_device(GPIO1_START_ADDR);
++    enable_gpio_device(GPIO2_START_ADDR);
++    enable_gpio_device(GPIO3_START_ADDR);
++
+     bank_map_registers(0, GPIO0_START_ADDR);
+     bank_map_registers(1, GPIO1_START_ADDR);
+     bank_map_registers(2, GPIO2_START_ADDR);
+@@ -181,12 +179,6 @@ void gpios_c::init()
+ 
+     pins[n] = NULL; // end mark
+ 
+-    // program pins registers
+-    // echo no  > /sys/class/gpio/export_pin
+-
+-    for (n = 0; (gpio = pins[n]); n++)
+-        export_pin(gpio);
+-
+     // set pin directions
+     // a) echo in|out > /sys/class/gpio/gpio<no>/direction
+     // b) bitmask in pin->gpio_bank_oe_addr
+diff --git a/10.01_base/2_src/arm/gpios.hpp b/10.01_base/2_src/arm/gpios.hpp
+index ccb00f5..89d74d1 100644
+--- a/10.01_base/2_src/arm/gpios.hpp
++++ b/10.01_base/2_src/arm/gpios.hpp
+@@ -133,7 +133,7 @@ private:
+     void bank_map_registers(unsigned bank_idx, unsigned unmapped_start_addr);
+     gpio_config_t *config(const char *name, int direction, unsigned bank_idx,
+                           unsigned pin_in_bank);
+-    void export_pin(gpio_config_t *pin);
++    void enable_gpio_device(unsigned start_addr);
+ 
+ public:
+ 
+-- 
+2.43.0
+
