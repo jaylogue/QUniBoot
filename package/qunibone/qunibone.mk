@@ -36,10 +36,12 @@ define QUNIBONE_BUILD_CMDS
     $(MAKE) -C $(@D)/10.03_app_demo/2_src -j1
 
     @echo Compiling QUniBone DTS overlay
-    $(LINUX_DIR)/scripts/dtc/dtc \
-        -@ -I dts -O dtb \
-        -o $(@D)/qunibone.dtbo \
-        $(BR2_EXTERNAL_QUNIBONE_PATH)/package/qunibone/qunibone.dtso
+    $(CPP) -nostdinc \
+        -I $(LINUX_DIR)/include \
+        -undef -x assembler-with-cpp \
+        $(BR2_EXTERNAL_QUNIBONE_PATH)/package/qunibone/qunibone.dtso | \
+    $(LINUX_DIR)/scripts/dtc/dtc -@ -I dts -O dtb \
+        -o $(@D)/qunibone.dtbo -
 endef
 
 define QUNIBONE_INSTALL_TARGET_CMDS

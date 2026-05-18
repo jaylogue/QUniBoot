@@ -1,34 +1,34 @@
-# Configuration overrides for linux kernel on QUniBone
+# Configuration overrides for QUniBoot linux kernel 
 #
 # This file contains overrides to the kernel build configuration
-# for QUniBone.  The overrides are relative to the stock bb.org
+# for QUniBoot.  The overrides are relative to the stock bb.org
 # defconfig that is part of the openbeagle.org beagleboard linux
 # tree. 
 
-# Use GZIP instead of XZ
-CONFIG_KERNEL_GZIP=y
-CONFIG_KERNEL_XZ=n
-
-# Enable UIO PRUSS driver
-CONFIG_UIO=y
-CONFIG_UIO_PRUSS=y
-CONFIG_UIO_PDRV_GENIRQ=y
-
-# Enable TI PRUSS 
-CONFIG_TI_PRUSS=y
-CONFIG_TI_PRUSS_INTC=y
-
-# Disable PRU remoteproc (conflicts with UIO PRUSS)
-CONFIG_PRU_REMOTEPROC=n
-
-# Ensure RT scheduling is available
-CONFIG_PREEMPT=y
+# Enable fully preemptible kernel
+CONFIG_PREEMPT_RT=y
 
 # Disable suspend support and initialization of the CM3 co-processor
 CONFIG_SUSPEND=n
 CONFIG_WKUP_M3_RPROC=n
 CONFIG_WKUP_M3_IPC=n
 CONFIG_AMX3_PM=n
+
+# Enable UIO PRUSS driver
+CONFIG_UIO=y
+CONFIG_UIO_PRUSS=y
+CONFIG_UIO_PDRV_GENIRQ=y
+
+# Enable TI PRUSS
+CONFIG_TI_PRUSS=y
+CONFIG_TI_PRUSS_INTC=y
+
+# Disable PRU remoteproc (conflicts with UIO PRUSS)
+CONFIG_PRU_REMOTEPROC=n
+
+# Use GZIP instead of XZ
+CONFIG_KERNEL_GZIP=y
+CONFIG_KERNEL_XZ=n
 
 # Disable unneeded features to improve boot times
 CONFIG_SECURITY_APPARMOR=n

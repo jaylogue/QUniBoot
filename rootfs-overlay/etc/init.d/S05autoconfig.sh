@@ -26,23 +26,16 @@ if [[ ! -f "${AUTOCONFIG_FILE}" ]]; then
 fi
 
 AUTOCONFIG_COMPLETED_FILE=/boot/autoconfig-completed.txt
-LED_GPIOS=(32 33 34 35)
-
-config_leds() {
-  for GPIO_NUM in ${LED_GPIOS[@]}; do
-    if [[ ! -d /sys/class/gpio/gpio${GPIO_NUM} ]]; then
-      echo ${GPIO_NUM} >> /sys/class/gpio/export
-      sleep 0.001
-    fi
-    echo 1 >> /sys/class/gpio/gpio${GPIO_NUM}/active_low
-    echo "out" >> /sys/class/gpio/gpio${GPIO_NUM}/direction
-    echo 0 >> /sys/class/gpio/gpio${GPIO_NUM}/value
-  done
-}
+LEDS=(
+  "/sys/class/leds/qunibone:test_led0"
+  "/sys/class/leds/qunibone:test_led1"
+  "/sys/class/leds/qunibone:test_led2"
+  "/sys/class/leds/qunibone:test_led3"
+)
 
 set_leds() {
-  for GPIO_NUM in ${LED_GPIOS[@]}; do
-    echo "$1" >> /sys/class/gpio/gpio${GPIO_NUM}/value
+  for LED in ${LEDS[@]}; do
+    echo "$1" >> ${LED}/brightness
   done
 }
 
@@ -67,11 +60,8 @@ AUTOCONFIG_RES=${PIPESTATUS[0]}
 # Rename the config file so that it doesn't get applied again
 mv "${AUTOCONFIG_FILE}" "${AUTOCONFIG_COMPLETED_FILE}"
 
-# Configure the gpios for the UniBone/QBone LEDs
-config_leds
-
-# If autoconfiguration was successful, flash the LEDs 3 times.
-# Otherwise, light the LEDs and leave them on.
+# If autoconfiguration was successful, flash the test LEDs in unison
+# 3 times. Otherwise, light the LEDs and leave them on.
 if [[ ${AUTOCONFIG_RES} -ge 0 ]]; then
   flash_leds 3
 else

@@ -1,8 +1,11 @@
-// Linux Device Tree Overlay for QUniBone
+// Linux Device Tree Overlay for QUniBoot
 // 
 
 /dts-v1/;
 /plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/input.h>
 
 / {
    compatible = "ti,beaglebone", "ti,beaglebone-black";
@@ -80,7 +83,15 @@
       target = <&am33xx_pinmux>;
       __overlay__ {
 
-         gpio_pins: pinmux_gpio_pins {         // The GPIO pins
+         // Bind the pinctrl state for the general (non-PRU) GPIO pins to
+         // the pinmux node itself.  This has the effect of forcing the pins
+         // to be configured during boot, even though they are not referenced
+         // by any other device.
+         pinctrl-names = "default";
+         pinctrl-0 = <&gpio_pins>;
+
+         // General (non-PRU) GPIO pins
+         gpio_pins: pinmux_gpio_pins {
             pinctrl-single,pins = <
 
                0x010 0x2f // SW0 input on P8.23: gpio1_4, rx, no pull up/dn, mode=7
@@ -109,7 +120,8 @@
             >;
          };
 
-         pru_pru_pins: pinmux_pru_pru_pins {   // The PRU pins
+         // PRU GPIO pins
+         pru_pru_pins: pinmux_pru_pru_pins {
             pinctrl-single,pins = <
                0x190 0x15 // PRU0 REG_DATOUT_0 on P9.31: pr1_pru0_pru_r30_0, fast, pullup, mode=5
                0x194 0x15 // PRU0 REG_DATOUT_1 on P9.29: pr1_pru0_pru_r30_1, fast, pullup, mode=5
@@ -143,7 +155,8 @@
 
    // Enable UIO PRUSS
    // This binds the UIO PRUSS driver to the existing pruss@0 node and 
-   // adds the config properties needed by the driver.
+   // adds the config properties needed by the driver. It also forces
+   // configuration of the PRU GPIO pins via the pinmux.
    fragment@1 {
       target = <&pruss>;
       __overlay__ {
@@ -156,21 +169,8 @@
       };
    };
 
-   // Enable GPIO helper
-   fragment@2 {
-      target = <&ocp>;
-      __overlay__ {
-         gpio_helper {
-            compatible = "gpio-of-helper";
-            status = "okay";
-            pinctrl-names = "default";
-            pinctrl-0 = <&gpio_pins>;
-         };
-      };
-   };
-
    // Enable UART1
-   fragment@3{
+   fragment@2 {
       target = <&uart1>;
       __overlay__ {
                status          = "okay";
@@ -178,22 +178,23 @@
     };
 
    // Enable UART2
-   fragment@4{
+   fragment@3 {
       target = <&uart2>;
       __overlay__ {
                status          = "okay";
       };
    };
 
-   // Disable McASP to avoid conflict with PRUSS
-   fragment@5 {
+   // Disable McASP to avoid conflict with pins used by QUniBone
+   fragment@4 {
       target = <&mcasp0>;
       __overlay__ {
          status = "disabled";
       };
    };
 
-   fragment@6 {
+   // Disable the LCD controller to avoid conflict pins used by QUniBone
+   fragment@5 {
       target = <&lcdc>;
       __overlay__ {
          status = "disabled";
@@ -201,7 +202,7 @@
    };
 
    // Disable HDMI encoder node
-   fragment@7 {
+   fragment@6 {
       target = <&tda19988>;
       __overlay__ {
          status = "disabled";
@@ -209,7 +210,7 @@
    };
 
    // Disable the driver for the on-board eMMC
-   fragment@8 {
+   fragment@7 {
       target = <&mmc2>;
       __overlay__ {
          status = "disabled";
@@ -218,7 +219,7 @@
 
    // Disable scanning for secondary cape EEPROMs
    // This reduces boots time by a small amount.
-   fragment@9 {
+   fragment@8 {
       target = <&i2c2>;
       __overlay__ {
          clock-frequency = <400000>;
@@ -231,6 +232,52 @@
          };
          cape_eeprom3: cape_eeprom3@57 {
             status = "disabled";
+         };
+      };
+   };
+
+   // Disable sound device
+   fragment@9 {
+      target-path = "/";
+      __overlay__ {
+         sound {
+            compatible = "disabled";
+         };
+      };
+   };
+   
+   // Enable access to QUniBone LEDs via gpio-leds driver.
+   fragment@10 {
+      target-path = "/";
+      __overlay__ {
+         qunibone_leds {
+               compatible = "gpio-leds";
+
+               qunibone_led0 {
+                  label = "qunibone:test_led0";
+                  gpios = <&gpio1 0 GPIO_ACTIVE_LOW>;
+                  default-state = "off";
+               };
+               qunibone_led1 {
+                  label = "qunibone:test_led1";
+                  gpios = <&gpio1 1 GPIO_ACTIVE_LOW>;
+                  default-state = "off";
+               };
+               qunibone_led2 {
+                  label = "qunibone:test_led2";
+                  gpios = <&gpio1 2 GPIO_ACTIVE_LOW>;
+                  default-state = "off";
+               };
+               qunibone_led3 {
+                  label = "qunibone:test_led3";
+                  gpios = <&gpio1 3 GPIO_ACTIVE_LOW>;
+                  default-state = "off";
+               };
+               qunibone_led4 {
+                  label = "qunibone:bus_activity_led";
+                  gpios = <&gpio0 30 GPIO_ACTIVE_LOW>;
+                  default-state = "off";
+               };
          };
       };
    };
