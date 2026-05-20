@@ -1,5 +1,14 @@
-# Fix-up incorrect syntax in makefiles
-#
+From db65c16aeb433600da3c5de0e3a5eed1ff3bcde8 Mon Sep 17 00:00:00 2001
+From: Jay Logue <jay.logue@gmail.com>
+Date: Fri, 24 Apr 2026 12:24:35 -0700
+Subject: [PATCH] Fix makefile syntax errors
+
+---
+ 10.03_app_demo/2_src/makefile   |  6 +++---
+ 10.03_app_demo/2_src/makefile_q | 20 ++++++++++----------
+ 10.03_app_demo/2_src/makefile_u | 20 ++++++++++----------
+ 3 files changed, 23 insertions(+), 23 deletions(-)
+
 diff --git a/10.03_app_demo/2_src/makefile b/10.03_app_demo/2_src/makefile
 index 1a8ad86..f494b78 100644
 --- a/10.03_app_demo/2_src/makefile
@@ -91,3 +100,6 @@ index 2aa1498..f85462b 100644
  endif
  
  
+-- 
+2.43.0
+

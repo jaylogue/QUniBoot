@@ -1,0 +1,95 @@
+From e22629ed042487f4e87505ecfb63afa24de01925 Mon Sep 17 00:00:00 2001
+From: Jay Logue <jay.logue@gmail.com>
+Date: Tue, 19 May 2026 08:52:01 -0700
+Subject: [PATCH] Use SETDATAOUT/CLEARDATAOUT to update GPIOs
+
+-- Modified the GPIO_SETVAL macro to use the AM335x SETDATAOUT
+and CLEARDATAOUT GPIO registers to set and clear individual
+GPIO bits. This eliminates the possibility of lost updates when
+GPIOs in the same module are updated simultaneously by multiple
+threads.
+
+-- Removed the GPIO_OUTPUTBITS macro, which was not thread-safe.
+With the rewrite of the GPIO_SETVAL macro, this macro was no
+longer used.
+
+-- Eliminated the output register cache (gpios_c::cur_dataout_val)
+which was no longer used. Note that, despite removing the caching
+mechanism, the maximum toggle frequency for a GPIO pin from the
+ARM processor *improved* from 2.27MHz to 2.70MHz.
+---
+ 10.01_base/2_src/arm/gpios.cpp |  9 ---------
+ 10.01_base/2_src/arm/gpios.hpp | 22 +++++++---------------
+ 2 files changed, 7 insertions(+), 24 deletions(-)
+
+diff --git a/10.01_base/2_src/arm/gpios.cpp b/10.01_base/2_src/arm/gpios.cpp
+index 1c0d2c1..e08e42d 100644
+--- a/10.01_base/2_src/arm/gpios.cpp
++++ b/10.01_base/2_src/arm/gpios.cpp
+@@ -191,12 +191,6 @@ void gpios_c::init()
+         *(gpio->bank->oe_addr) = reg;
+     }
+ 
+-    // init output register cache with values (after export_pin!)
+-    for (n = 0; n < 4; n++)
+-        // bus error, if no gpio registered from this bank
+-        if (banks[n].gpios_in_use > 0)
+-            banks[n].cur_dataout_val = *(banks[n].dataout_addr);
+-
+     if (leds_for_debug) {
+         // shared with LEDs
+         ARM_DEBUG_PIN0(0)
+@@ -318,9 +312,6 @@ void gpios_c::test_toggle(gpio_config_t *gpio)
+         ;
+         GPIO_SETVAL(gpio, 0)
+         ;
+-        // fastest possible:
+-        // *(gpio->bank->setdataout_addr) = gpio->pin_in_bank_mask;
+-        //*(gpio->bank->clrdataout_addr) = gpio->pin_in_bank_mask;
+     }
+ }
+ 
+diff --git a/10.01_base/2_src/arm/gpios.hpp b/10.01_base/2_src/arm/gpios.hpp
+index 89d74d1..bfbfce6 100644
+--- a/10.01_base/2_src/arm/gpios.hpp
++++ b/10.01_base/2_src/arm/gpios.hpp
+@@ -81,9 +81,6 @@ typedef struct {
+     // Address of DATAOUT register. Reflects the GPIO output pin voltage levels.
+     volatile uint32_t *dataout_addr;
+ 
+-    uint32_t cur_dataout_val; // cached value of dataout register
+-    // access to this is much faster than the GPIO dataut itself.
+-
+ // mapped address of "set pin" register
+     // bit<i> := 1: gpio pin i is set to H level
+     volatile uint32_t *setdataout_addr;
+@@ -165,19 +162,14 @@ public:
+ };
+ extern gpios_c *gpios; // singleton
+ 
+-// merges the bits of unshifted_val into the gpio output register
+-// of bank[idx]. target position is given by bitpos, bitfield size by bitmask
+-// This macro is optimized assuming that writing a memorymapped GPIO register
+-// takes much longer than ARM internal operations.
+-#define GPIO_OUTPUTBITS(bank,bitpos,bitmask,unshifted_val) do {	\
+-		unsigned tmp = (bank)->cur_dataout_val ; \
+-		tmp &= ~((bitmask) << (bitpos)) ; /* erase bitfield*/	\
+-		tmp |= ((unshifted_val) & (bitmask)) << (bitpos) ; /* copy val to bitfield*/ \
+-		(bank)->cur_dataout_val = *((bank)->dataout_addr) = tmp ; \
+-} while(0)
+-
+ // set a value by writing a bit mask into output register
+-#define GPIO_SETVAL(gpio,val) GPIO_OUTPUTBITS((gpio)->bank, (gpio)->pin_in_bank, 1, (val) )
++#define GPIO_SETVAL(gpio,val) do { \
++        if (val) { \
++            *(gpio)->bank->setdataout_addr = (gpio)->pin_in_bank_mask; \
++        } else { \
++            *(gpio)->bank->clrdataout_addr = (gpio)->pin_in_bank_mask; \
++        } \
++} while(0)
+ 
+ // get a value by reading value register
+ // Getval(input) reads pin. Getval(output) reads values set.
+-- 
+2.43.0
+

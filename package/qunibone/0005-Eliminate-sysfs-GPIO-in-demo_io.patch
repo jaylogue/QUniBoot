@@ -1,0 +1,201 @@
+From 24f2b34c0c25d92070f05a1d1d436027d853f803 Mon Sep 17 00:00:00 2001
+From: Jay Logue <jay.logue@gmail.com>
+Date: Tue, 19 May 2026 09:14:14 -0700
+Subject: [PATCH] Eliminate use of sysfs GPIO interface in demo_io device
+
+-- Modified the demo_io device to use direct access to the GPIO
+registers via the gpios_c class rather than interacting with
+the legacy sysfs GPIO file interface (/sys/class/gpio/gpioNNN).
+
+The linux sysfs GPIO file interface is now deprecated. While it
+is still present in the kernel, the pattern for using it has
+changed incompatibly in recent versions. Rather than adopt
+the new pattern, it was easier to eliminate its use altogether.
+---
+ 10.02_devices/2_src/demo_io.cpp | 120 +++++---------------------------
+ 10.02_devices/2_src/demo_io.hpp |   5 --
+ 2 files changed, 17 insertions(+), 108 deletions(-)
+
+diff --git a/10.02_devices/2_src/demo_io.cpp b/10.02_devices/2_src/demo_io.cpp
+index 2ab3db4..6fbc076 100644
+--- a/10.02_devices/2_src/demo_io.cpp
++++ b/10.02_devices/2_src/demo_io.cpp
+@@ -23,13 +23,13 @@
+ 
+  12-nov-2018  JH      entered beta phase
+ 
+- demo_io:
+- A device to access GPIOs with /sys/class interface
+- Implements a combined "Switch register/display register" at 0760100
+- Read gets the value of the 4 switches at bits 0x000f
+- and the button state at MSB 0x0010
+- Write sets the LEDs with mask 0x000f
+- No active register callbacks, just polling in worker()
++ demo_io: A device to access QUniBone LED/switch GPIOs.
++
++ Implements switch and display registers at 0760100, 0760102.
++ Reading 0760100 gets the value of the 4 switches (bits 0x000f) and the button
++ state (bit 0x0010).
++ Writing 0760102 sets the LEDs (bits 0x000f).
++ No active register callbacks, just polling in worker().
+  */
+ 
+ #include <string.h>
+@@ -38,6 +38,7 @@
+ #include "timeout.hpp"
+ #include "qunibusadapter.hpp"
+ #include "qunibusdevice.hpp"	// definition of class device_c
++#include "gpios.hpp"
+ #include "demo_io.hpp"
+ 
+ demo_io_c::demo_io_c() :
+@@ -69,39 +70,11 @@ demo_io_c::demo_io_c() :
+ 	display_reg->active_on_dato = false;
+ 	display_reg->reset_value = 0;
+ 	display_reg->writable_bits = 0x000f; // not necessary
+-
+-	// map register bits to gpio pins
+-	//       BBB     ARM       /sys/class/gpio
+-	// LED0: P8.25 = GPIO1_0  = 32
+-	// LED1: P8.24 = GPIO1_1  = 33
+-	// LED2: P8.05 = GPIO1_2  = 34
+-	// LED3: P8.06 = GPIO1_3  = 35
+-	// SW0:  P8.23 = GPIO1_4  = 36
+-	// SW1:  P8.22 = GPIO1_5  = 37
+-	// SW2:  P8.03 = GPIO1_6  = 38
+-	// SW3:  P8.04 = GPIO1_7  = 39
+-	// BTN:  P8.12 = GPIO1_12 = 44
+-
+-	gpio_open(gpio_outputs[0], false, 32); // LED 0
+-	gpio_open(gpio_outputs[1], false, 33); // LED 1
+-	gpio_open(gpio_outputs[2], false, 34); // LED 2
+-	gpio_open(gpio_outputs[3], false, 35); // LED 3
+-
+-	gpio_open(gpio_inputs[0], true, 36); // SW0
+-	gpio_open(gpio_inputs[1], true, 37); // SW1
+-	gpio_open(gpio_inputs[2], true, 38); // SW2
+-	gpio_open(gpio_inputs[3], true, 39); // SW3
+-	gpio_open(gpio_inputs[4], true, 44); // BUTTON
+ }
+ 
+ demo_io_c::~demo_io_c() 
+ {
+-	// close all gpio value files
+-	unsigned i;
+-	for (i = 0; i < 5; i++)
+-		gpio_inputs[i].close();
+-	for (i = 0; i < 4; i++)
+-		gpio_outputs[i].close();
++	// nothing to do
+ }
+ 
+ bool demo_io_c::on_param_changed(parameter_c *param) 
+@@ -110,81 +83,22 @@ bool demo_io_c::on_param_changed(parameter_c *param)
+ 	return qunibusdevice_c::on_param_changed(param); // more actions (for enable)
+ }
+ 
+-/* helper: opens the control file for a gpio
+- * exports, programs directions, assigns stream
+- */
+-void demo_io_c::gpio_open(std::fstream& value_stream, bool is_input, unsigned gpio_number) 
+-{
+-	const char *gpio_class_path = "/sys/class/gpio";
+-
+-	value_stream.close(); // if open
+-
+-	// 1. export pin, so it appears as .../gpio<nr>
+-	char export_filename[80];
+-	std::ofstream export_file;
+-	sprintf(export_filename, "%s/export", gpio_class_path);
+-	export_file.open(export_filename);
+-
+-	if (!export_file.is_open()) {
+-		printf("Failed to open %s.\n", export_filename);
+-		return;
+-	}
+-	export_file << gpio_number << "\n";
+-	export_file.close();
+-
+-	// 2. Now we have directory /sys/class/gpio<number>
+-	//	Set to input or output
+-	char direction_filename[80];
+-	std::ofstream direction_file;
+-	sprintf(direction_filename, "%s/gpio%d/direction", gpio_class_path, gpio_number);
+-	direction_file.open(direction_filename);
+-	if (!direction_file.is_open()) {
+-		printf("Failed to open %s.\n", direction_filename);
+-		return;
+-	}
+-	direction_file << (is_input ? "in" : "out") << "\n";
+-	direction_file.close();
+-
+-	// 3. Open the "value" file
+-	char value_filename[80];
+-	sprintf(value_filename, "%s/gpio%d/value", gpio_class_path, gpio_number);
+-	if (is_input)
+-		value_stream.open(value_filename, std::fstream::in);
+-	else
+-		value_stream.open(value_filename, std::fstream::out);
+-	if (!value_stream.is_open())
+-		printf("Failed to open %s.\n", value_filename);
+-}
+-
+ // read a gpio input value from its stream
+ unsigned demo_io_c::gpio_get_input(unsigned input_index) 
+ {
+-	std::fstream *value_stream = &(gpio_inputs[input_index]);
+-	if (!value_stream->is_open())
+-		return 0; // ignore gpio file access errors
+-	std::string val_str;
+-	value_stream->seekg(0); // restart reading from begin
+-	*value_stream >> val_str; // read "0" or "1"
+-	if (val_str.length() > 0 && val_str[0] == '1')
+-		return 1;
+-	else
+-		return 0;
++	if (input_index < 4)
++		return GPIO_GETVAL(gpios->swtch[input_index]) != 0;
++	else if (input_index == 4)
++		return GPIO_GETVAL(gpios->button) != 0;
++	FATAL("Invalid input_index: %u", input_index);
++	return 0;
+ }
+ 
+ // write a gpio output value into its stream
+ void demo_io_c::gpio_set_output(unsigned output_index, unsigned value) 
+ {
+-	std::fstream *value_stream = &(gpio_outputs[output_index]);
+-	if (!value_stream->is_open())
+-		// ignore file access errors
+-		return;
+-	value_stream->seekp(0); // restart writing from begin
+-	// LED voltage signals are inverted: "ON" = 0.
+-	if (value)
+-		*value_stream << "0\n";
+-	else
+-		*value_stream << "1\n";
+-	value_stream->flush(); // now!
++	if (output_index < 4)
++		GPIO_SETVAL(gpios->led[output_index], value);
+ }
+ 
+ // background worker.
+diff --git a/10.02_devices/2_src/demo_io.hpp b/10.02_devices/2_src/demo_io.hpp
+index bf702ad..d9eb730 100644
+--- a/10.02_devices/2_src/demo_io.hpp
++++ b/10.02_devices/2_src/demo_io.hpp
+@@ -37,11 +37,6 @@ private:
+ 	qunibusdevice_register_t *switch_reg;
+ 	qunibusdevice_register_t *display_reg;
+ 
+-	// file handles for GPIO pins
+-	std::fstream gpio_inputs[5]; // 4 switches, 1 button
+-	std::fstream gpio_outputs[4]; // 4 LEDs
+-
+-	void gpio_open(std::fstream& value_stream, bool is_input, unsigned gpio_number);
+ 	unsigned gpio_get_input(unsigned input_index);
+ 	void gpio_set_output(unsigned output_index, unsigned value);
+ 
+-- 
+2.43.0
+

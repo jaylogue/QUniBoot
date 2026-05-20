@@ -1,5 +1,12 @@
-# Include time.h needed for struct timespec
-#
+From 4ce98e04579b0ca184adffcb38d050c6ffb80c90 Mon Sep 17 00:00:00 2001
+From: Jay Logue <jay.logue@gmail.com>
+Date: Fri, 24 Apr 2026 12:25:40 -0700
+Subject: [PATCH] Include time.h needed for struct timespec
+
+---
+ 10.01_base/2_src/arm/utils.hpp | 1 +
+ 1 file changed, 1 insertion(+)
+
 diff --git a/10.01_base/2_src/arm/utils.hpp b/10.01_base/2_src/arm/utils.hpp
 index 2c21920..6648baf 100644
 --- a/10.01_base/2_src/arm/utils.hpp
@@ -12,3 +19,6 @@ index 2c21920..6648baf 100644
  
  #include <string>
  #include <algorithm> // TRIM_STRING
+-- 
+2.43.0
+

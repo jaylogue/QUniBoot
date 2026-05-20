@@ -1,16 +1,22 @@
-From 45c22e7fffe7790c76598babbf3047c4b9b8599b Mon Sep 17 00:00:00 2001
+From b89b80d9a5c1957900139c7e8e75cbc658aff157 Mon Sep 17 00:00:00 2001
 From: Jay Logue <jay.logue@gmail.com>
 Date: Fri, 24 Apr 2026 13:01:32 -0700
-Subject: [PATCH] Use PM interface to enable GPIOs
+Subject: [PATCH] Use PM interface to enable GPIO banks
 
--- Switch to using the sysfs device power management interface to
-enable the AM335x GPIO banks. This avoids using the legacy sysfs
-GPIO interface (/sys/class/gpio/gpioXXX) which has changed behavior
+-- Modified the gpios_c class to use the sysfs device power
+management interface (/sys/bus/platform/devices/*.gpio/power/control)
+to enable the AM335x GPIO banks. This avoids using the legacy sysfs
+GPIO interface (/sys/class/gpio/gpio*) which has changed behavior
 in an incompatible way in later kernels.
 
-Note that this eliminates entirely the activity of exporting the
-individual non-PRU GPIOs, which wasn't strictly necessary since all
-GPIO interactions are done through direct register access.
+Note that this eliminates the activity of exporting the individual
+non-PRU GPIOs using the legacy interface. This action isn't strictly
+necessary since all subsequent GPIO interactions by the gpios_c
+class are done through direct register access. The net effect of the
+previous code was simply to ensure that all the GPIO banks were
+appropriately powered and clocked (a prerequisite for direct register
+access). This is now handled directly via the device power interface,
+which is both simpler and faster.
 ---
  10.01_base/2_src/arm/gpios.cpp | 42 ++++++++++++++--------------------
  10.01_base/2_src/arm/gpios.hpp |  2 +-
