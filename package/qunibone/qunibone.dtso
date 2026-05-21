@@ -254,27 +254,27 @@
                compatible = "gpio-leds";
 
                qunibone_led0 {
-                  label = "qunibone:test_led0";
+                  label = "qunibone:led0";
                   gpios = <&gpio1 0 GPIO_ACTIVE_LOW>;
                   default-state = "off";
                };
                qunibone_led1 {
-                  label = "qunibone:test_led1";
+                  label = "qunibone:led1";
                   gpios = <&gpio1 1 GPIO_ACTIVE_LOW>;
                   default-state = "off";
                };
                qunibone_led2 {
-                  label = "qunibone:test_led2";
+                  label = "qunibone:led2";
                   gpios = <&gpio1 2 GPIO_ACTIVE_LOW>;
                   default-state = "off";
                };
                qunibone_led3 {
-                  label = "qunibone:test_led3";
+                  label = "qunibone:led3";
                   gpios = <&gpio1 3 GPIO_ACTIVE_LOW>;
                   default-state = "off";
                };
-               qunibone_led4 {
-                  label = "qunibone:bus_activity_led";
+               qunibone_activity_led {
+                  label = "qunibone:activity_led";
                   gpios = <&gpio0 30 GPIO_ACTIVE_LOW>;
                   default-state = "off";
                };

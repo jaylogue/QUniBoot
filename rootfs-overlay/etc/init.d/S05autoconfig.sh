@@ -27,10 +27,10 @@ fi
 
 AUTOCONFIG_COMPLETED_FILE=/boot/autoconfig-completed.txt
 LEDS=(
-  "/sys/class/leds/qunibone:test_led0"
-  "/sys/class/leds/qunibone:test_led1"
-  "/sys/class/leds/qunibone:test_led2"
-  "/sys/class/leds/qunibone:test_led3"
+  "/sys/class/leds/qunibone:led0"
+  "/sys/class/leds/qunibone:led1"
+  "/sys/class/leds/qunibone:led2"
+  "/sys/class/leds/qunibone:led3"
 )
 
 set_leds() {
