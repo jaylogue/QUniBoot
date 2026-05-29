@@ -1,0 +1,24 @@
+From: Jay Logue <jay.logue@gmail.com>
+Date: Thu, 28 May 2026 19:51:47 -0700
+Subject: [PATCH] Eliminate compiler warning
+
+---
+*** a/main.c	2026-05-28 19:48:00.522749519 -0700
+--- b/main.c	2026-05-28 19:48:10.748073686 -0700
+*************** int main(int argc, char *argv[]) {
+*** 539,545 ****
+  		fprintf(ferr, "Command line: ") ;
+  		for (i=0 ; i < argc ; i++)
+  			fprintf(ferr, "%s ", argv[i]) ;
+! 			fprintf(ferr, "\n") ;
+  	}
+  
+  	// load memory
+--- 539,545 ----
+  		fprintf(ferr, "Command line: ") ;
+  		for (i=0 ; i < argc ; i++)
+  			fprintf(ferr, "%s ", argv[i]) ;
+! 		fprintf(ferr, "\n") ;
+  	}
+  
+  	// load memory

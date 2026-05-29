@@ -1,0 +1,4 @@
+config BR2_PACKAGE_PDP11MONLOADER
+    bool "pdp11monloader"
+    help
+      A tool to download code into vintage PDP-11 computers over serial connection using the console monitor.
