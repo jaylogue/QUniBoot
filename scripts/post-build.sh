@@ -48,3 +48,6 @@ sed -i -e "s/label \+qunibone/label ${PLATFORM_NAME_LC}/" ${BINARIES_DIR}/extlin
 
 echo "Installing autoconfig-example.txt"
 install -m 0644 -D ${BR2_EXTERNAL_QUNIBONE_PATH}/board/qunibone/autoconfig-example.txt ${BINARIES_DIR}/autoconfig-example.txt
+
+echo "Restoring busybox vi"
+ln -sf busybox ${TARGET_DIR}/bin/vi
