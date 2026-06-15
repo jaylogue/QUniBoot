@@ -1,6 +1,6 @@
 # <filesystem>   <mount>       <type>   <options>               <dump> <pass>
 /dev/mmcblk0p2   /             ext4     rw,noatime              0 1
-/dev/mmcblk0p3   /root         ext4     defaults,noatime        0 2
+/dev/mmcblk0p3   /qunibone     ext4     defaults,noatime        0 2
 /dev/mmcblk0p1   /boot         vfat     defaults,noatime        0 0
 proc             /proc         proc     defaults                0 0
 devpts           /dev/pts      devpts   defaults,gid=5,mode=620,ptmxmode=0666  0 0

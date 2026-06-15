@@ -35,15 +35,15 @@ define QUNIBONE_OS_IMAGES_INSTALL_TARGET_CMDS
 	}
 
 	@echo "Installing QUniBone OS image files"
-	tar -C $(TARGET_DIR)/root -xvf $(QUNIBONE_OS_IMAGES_TAR_FILE) --xform 's|5_applications_[qu]|5_applications|' \
+	tar -C $(QUNIBONE_INSTALL_DIR) -xvf $(QUNIBONE_OS_IMAGES_TAR_FILE) --xform 's|5_applications_[qu]|5_applications|' \
 		./10.03_app_demo/5_applications \
 		./10.03_app_demo/5_applications$(QUNIBONE_PLATFORM_SUFFIX)
 	
 	@echo "Setting script permissions"
-	@find $(TARGET_DIR)/root/10.03_app_demo/5_applications -type f -name \*.sh -exec chmod +x {} \;
+	@find $(QUNIBONE_INSTALL_DIR)/10.03_app_demo/5_applications -type f -name \*.sh -exec chmod +x {} \;
 	
 	@echo "Creating script shortcuts"
-	@(cd $(TARGET_DIR)/root; find ./10.03_app_demo/5_applications -type f -name \*.sh -exec ln -sf {} . \;)
+	@(cd $(QUNIBONE_INSTALL_DIR); find ./10.03_app_demo/5_applications -type f -name \*.sh -exec ln -sf {} . \;)
 endef
 
 $(eval $(generic-package))

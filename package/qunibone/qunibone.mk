@@ -6,6 +6,8 @@ QUNIBONE_LICENSE_FILES = LICENSE
 
 QUNIBONE_DEPENDENCIES = host-ti-cgt-pru linux
 
+QUNIBONE_INSTALL_DIR=$(TARGET_DIR)/qunibone
+
 # Choice option
 ifeq ($(BR2_PACKAGE_QUNIBONE_PLATFORM_UNIBUS),y)
 QUNIBONE_PLATFORM=UNIBUS
@@ -49,11 +51,11 @@ define QUNIBONE_INSTALL_TARGET_CMDS
     $(INSTALL) -D -m 0755 $(@D)/10.03_app_demo/4_deploy$(QUNIBONE_PLATFORM_SUFFIX)/demo $(TARGET_DIR)/usr/local/bin/demo
 
     @echo Creating symlink to QUniBone executable in 10.03_app_demo/4_deploy
-    $(INSTALL) -d $(TARGET_DIR)/root/10.03_app_demo/4_deploy
-    ln -fs /usr/local/bin/demo $(TARGET_DIR)/root/10.03_app_demo/4_deploy/demo
+    $(INSTALL) -d $(QUNIBONE_INSTALL_DIR)/10.03_app_demo/4_deploy
+    ln -fs /usr/local/bin/demo $(QUNIBONE_INSTALL_DIR)/10.03_app_demo/4_deploy/demo
 
     @echo Installing demo.sh script into home directory
-    $(INSTALL) -D -m 0755 $(@D)/demo.sh $(TARGET_DIR)/root/demo.sh
+    $(INSTALL) -D -m 0755 $(@D)/demo.sh $(QUNIBONE_INSTALL_DIR)/demo.sh
 
     @echo Installing QUniBone DTS overlay into images directory
     $(INSTALL) -D -m 0644 $(@D)/qunibone.dtbo $(BINARIES_DIR)/qunibone.dtbo

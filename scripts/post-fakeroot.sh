@@ -4,9 +4,9 @@
 #
 # This script is invoked immediately prior to root filesystem image generation,
 # within the context of a fakeroot(1) environment. Its purpose is to segregate
-# the files that go into the app filesystem (essentially, everything in the root
-# home directory) and generate the app filesystem image itself. After this is
-# done, the normal BuildRoot process generates the root filesystem from the
+# the files that go into the app filesystem (essentially, everything in the
+# /qunibone directory) and generate the app filesystem image itself. After this
+# is done, the normal BuildRoot process generates the root filesystem from the
 # remaining files.
 # 
 
@@ -20,8 +20,8 @@ APP_TARGET_DIR=$(realpath "${TARGET_DIR}/../app-target")
 
 echo "Generating app-target directory"
 mkdir -p ${APP_TARGET_DIR}
-cp -a "${TARGET_DIR}/root/." "${APP_TARGET_DIR}/"
-find "${TARGET_DIR}/root" -mindepth 1 -delete
+cp -a "${TARGET_DIR}/qunibone/." "${APP_TARGET_DIR}/"
+find "${TARGET_DIR}/qunibone" -mindepth 1 -delete
 
 echo "Generating app filesystem image appfs.ext4"
 rm -f "${BINARIES_DIR}/appfs.ext4"

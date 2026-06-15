@@ -27,7 +27,7 @@ define QUNIBONE_BOOT_ROMS_INSTALL_TARGET_CMDS
 	}
 
 	@echo "Installing PDP-11 boot ROMs"
-	tar -C $(TARGET_DIR)/root -xvf $(QUNIBONE_BOOT_ROMS_TAR_FILE)
+	tar -C $(QUNIBONE_INSTALL_DIR) -xvf $(QUNIBONE_BOOT_ROMS_TAR_FILE)
 endef
 
 $(eval $(generic-package))

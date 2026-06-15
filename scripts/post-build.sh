@@ -51,3 +51,6 @@ install -m 0644 -D ${BR2_EXTERNAL_QUNIBONE_PATH}/board/qunibone/autoconfig-examp
 
 echo "Restoring busybox vi"
 ln -sf busybox ${TARGET_DIR}/bin/vi
+
+echo "Linking root directory"
+ln -sfn qunibone ${TARGET_DIR}/root
