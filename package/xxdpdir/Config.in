@@ -1,0 +1,5 @@
+config BR2_PACKAGE_XXDPDIR
+    bool "XXDPDIR"
+    depends on BR2_PACKAGE_PERL
+    help
+      DEC PDP-11 XXDP (DOS-11) file system manipulation program.

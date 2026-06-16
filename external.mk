@@ -5,3 +5,4 @@ include $(BR2_EXTERNAL_QUNIBONE_PATH)/package/macro11/macro11.mk
 include $(BR2_EXTERNAL_QUNIBONE_PATH)/package/open-simh/open-simh.mk
 include $(BR2_EXTERNAL_QUNIBONE_PATH)/package/retro-fuse/retro-fuse.mk
 include $(BR2_EXTERNAL_QUNIBONE_PATH)/package/pdp11monloader/pdp11monloader.mk
+include $(BR2_EXTERNAL_QUNIBONE_PATH)/package/xxdpdir/xxdpdir.mk
