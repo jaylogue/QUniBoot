@@ -12,6 +12,11 @@ if [[ $# -lt 2 ]]; then
 fi
 QUNIBONE_PLATFORM=$2
 
+if [[ "${TARGET_DIR}" = "" || "${TARGET_DIR}" = "/" ]]; then
+    echo "Invalid target directory argument"
+    exit 1
+fi
+
 if [[ "${QUNIBONE_PLATFORM}" = "UNIBUS" ]]; then
     PLATFORM_NAME='UniBone'
 elif [[ "${QUNIBONE_PLATFORM}" = "QBUS" ]]; then
