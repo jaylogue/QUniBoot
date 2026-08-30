@@ -53,4 +53,7 @@ echo "Restoring busybox vi"
 ln -sf busybox ${TARGET_DIR}/bin/vi
 
 echo "Linking root directory"
+if [[ -e ${TARGET_DIR}/root && ! -L ${TARGET_DIR}/root ]]; then
+    rm -rf ${TARGET_DIR}/root
+fi
 ln -sfn qunibone ${TARGET_DIR}/root
