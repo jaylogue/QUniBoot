@@ -49,6 +49,22 @@ if [[ ! -f "${TARGET_DIR}/etc/init.d/DISABLED.S50telnet" ]]; then
     mv ${TARGET_DIR}/etc/init.d/S50telnet ${TARGET_DIR}/etc/init.d/DISABLED.S50telnet
 fi
 
+echo "Customizing os-release file"
+if [[ "${BR2_VERSION_FULL}" =~ ^-g ]]; then
+    QUNIBOOT_VERSION=v0${BR2_VERSION_FULL}
+else
+    QUNIBOOT_VERSION=${BR2_VERSION_FULL}
+fi
+cat > ${TARGET_DIR}/etc/os-release <<EOF
+NAME=QUniBoot
+ID=quniboot
+VARIANT=${PLATFORM_NAME}
+VARIANT_ID=${PLATFORM_NAME_LC}
+VERSION=${QUNIBOOT_VERSION}
+PRETTY_NAME="QUniBoot for ${PLATFORM_NAME} (${QUNIBOOT_VERSION})"
+HOME_URL="https://github.com/jaylogue/QUniBoot"
+EOF
+
 echo "Customizing welcome message"
 cat > ${TARGET_DIR}/etc/issue <<EOF
 Welcome to ${PLATFORM_NAME}

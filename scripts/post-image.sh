@@ -11,10 +11,9 @@
 set -e
 
 if [[ $# -lt 1 ]]; then
-    echo "Missing target directory argument"
+    echo "Missing directory argument"
     exit 1
 fi
-TARGET_DIR=$1
 
 if [[ $# -lt 2 ]]; then
     echo "Missing platform argument"
@@ -37,6 +36,10 @@ GENIMAGE_CFG=${BR2_EXTERNAL_QUNIBONE_PATH}/board/qunibone/genimage.cfg
 rm -f ${BINARIES_DIR}/quniboot-${PLATFORM_NAME_LC}-{full,os-only}.img* \
       ${BINARIES_DIR}/quniboot-{full,os-only}.img* \
       ${BINARIES_DIR}/genimage.cfg
+
+# Copy os-release file into images directory so that it can be included
+# in the boot partition.
+cp ${TARGET_DIR}/etc/os-release ${BINARIES_DIR}
 
 # If the user has requested custom files to be placed in the boot partition,
 # make a copy of the genimage.cfg file and edit it to include the requested
