@@ -1,4 +1,12 @@
 #!/usr/bin/bash
+#
+# QUniBoot post-build script
+#
+# This script is invoked after all packages are build, but before the filessytem images
+# are assembled.  Its purpose is to apply a number of QUniBoot-specific customizations
+# to the files in the target directory that will ultimately be incorporated into the
+# root filesystem.
+#
 
 if [[ $# -lt 1 ]]; then
     echo "Missing target directory argument"

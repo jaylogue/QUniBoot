@@ -1,4 +1,12 @@
 #!/bin/bash
+#
+# QUniBoot post-image script
+#
+# This script is invoked after the filesystem images have been created. Its purpose
+# is to assemble the final SD-card images from the various filesystem images using
+# the BuildRoot genimage.sh tool. As part of this process, it applies any customization
+# to the boot parition found in the boot-overlay directory.
+#
 
 set -e
 
