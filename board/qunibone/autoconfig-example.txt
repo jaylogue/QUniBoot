@@ -1,21 +1,33 @@
 # QUniBoot Auto-configuration Settings File
 #
 # Use this file to automatically configure various OS settings when the 
-# QUniBoot system boots.
+# QUniBoot system boots. Auto-configuration can be performed at first
+# boot of a newly installed SD card, or on any subsequent boot.
 #
-# To use, mount the QUniBoot SD card on your computer and edit the settings
-# below as needed for your system. Rename the file to "autoconfig.txt" and
-# then boot the UniBone/QBone system using the updated SD card. During the
-# boot process, the system will automatically apply the settings and then
-# rename the file to "autoconfig-completed.txt". If the autoconfig process
-# is successful, the system will flash the UniBone/QBone LEDs 3 times. If an
-# error occurs, the system will light the LEDs and leave them on. The system
-# log file (/var/log/messages) can be inspected to determine the cause of
-# any errors.
+# To enable auto-configuration:
 #
-# All settings values are optional. Any value that is not set will leave the
-# existing system configuration unchanged.
+# - mount the QUniBoot SD card on your computer and edit the settings
+#   below as needed for your system. Uncomment the settings you wish
+#   to change and leave others commented out.
 #
+#     Note that all settings values are optional. Any value that is not
+#     set will leave the existing system configuration unchanged.
+#
+# - When done editing, rename the file to "autoconfig.txt" and eject the
+#   SD card.
+#
+# - Insert the card into the BeagleBone Black and boot the system using
+#   the updated SD card.
+#
+# During the boot process, the system will automatically apply the given
+# settings. When the process completes, the system will flash the UniBone/
+# QBone LEDs 3 times. If an error occurs, the system will light the LEDs
+# and leave them on. The system log file (/var/log/messages) can be
+# inspected to determine the cause of any errors.
+#
+# After auto-configuration completes, the "autoconfig.txt" file will be 
+# renamed to "autoconfig-completed.txt". You can rename this file back
+# to "autoconfig.txt" to perform auto-configuration again.
 #
 
 # Set the system hostname
@@ -41,15 +53,23 @@
 #IP_ADDR=DHCP
 
 # Set the password for the root user.
+#
 #ROOT_PASSWORD=<string>
 
 # Add the given SSH public key to the root user's authorized_keys file
 #
-# This has no effect if the key already exists in the authorized_keys file.
+# The value should be the base64 encoded public key in standard authorized_keys
+# format (e.g. "ssh-rsa AAA....").
 #
-#root_authorized_key=<base64-pub-key>
+# This setting has no effect if the key already exists in root's
+# authorized_keys file.
+#
+#ROOT_AUTHORIZED_KEY=<base64-pub-key>
 
 # Clear (delete) the root user's authorized_keys file
+#
+# This can be used with the ROOT_AUTHORIZED_KEY setting to entirely
+# replace the root user's authorized_keys file.
 #
 #ROOT_AUTHORIZED_KEY=CLEAR
 
