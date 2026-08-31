@@ -1,8 +1,8 @@
 # QUniBoot
 
-QUniBoot is a small Linux distribution targeting the BeagleBone Black SBC running in a
-[UniBone](https://retrocmp.com/projects/unibone) or [QBone](https://retrocmp.com/projects/qbone)
-DEC hardware emulator. QUniBoot is intended to serve as a smaller and faster alternative to
+QUniBoot is a small Linux distribution targeting the BeagleBone Black SBC embedded in th
+[UniBone](https://retrocmp.com/projects/unibone) and [QBone](https://retrocmp.com/projects/qbone)
+DEC hardware emulators. QUniBoot is intended to serve as a smaller and faster alternative to
 the original Debian-based OS images created by Jörg Hoppe.
 
 The QUniBoot system includes the UniBone/QBone emulation software along with the full
