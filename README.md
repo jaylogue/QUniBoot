@@ -1,19 +1,17 @@
 # QUniBoot
 
-## Introduction
-
-QUniBoot is a small Linux distribution targeting the BeagleBone Black single-board
-computer running in the [UniBone](https://retrocmp.com/projects/unibone) / [QBone](https://retrocmp.com/projects/qbone)
-DEC hardware emulators. It is intended to serve as a smaller and faster alternative to
+QUniBoot is a small Linux distribution targeting the BeagleBone Black SBC running in a
+[UniBone](https://retrocmp.com/projects/unibone) or [QBone](https://retrocmp.com/projects/qbone)
+DEC hardware emulator. QUniBoot is intended to serve as a smaller and faster alternative to
 the original Debian-based OS images created by Jörg Hoppe.
 
-QUniBoot includes the original UniBone/QBone emulation software along with the full
-set of PDP-11 operating system disk images and support scripts provided in the original distribution. 
-In support of this, QUniBoot incorporates a modern Linux kernel, and the system
-software needed to run it.
+The QUniBoot system includes the UniBone/QBone emulation software along with the full
+set of PDP-11 operating system disk images and support scripts available in the original distribution.
+Supporting this is a modern Linux kernel and associated system software based on the
+[BuildRoot](https://buildroot.org) embedded Linux system generation tool.
 
-Compared to the original distribution, QUniBoot has a number of new features, as well
-as a few omissions. See [Differences vs Existing UniBone/QBone Distribution](#differences-vs-existing-unibone/qbone-distribution)
+Compared to the original UniBone/QBone distribution, QUniBoot has a number of new features,
+as well as a few omissions. See [Differences vs Existing UniBone/QBone Distribution](#differences-vs-existing-unibone/qbone-distribution)
 for details.
 
 ## Features
@@ -28,6 +26,22 @@ for details.
   automatically expands to fill the SD card on first boot.
 - **Easy OS-only upgrades**: Replace the contents of the OS partition
   without affecting user files.
+
+## Differences vs Existing UniBone/QBone Distribution
+
+QUniBoot is designed as a purpose-built embedded OS rather than a general-purpose desktop
+system. Its most significant departure from typical desktop OSes is the absence
+of a package manager. In QUniBoot, software packages are selected and built into the
+system image at generation time, rather than installed at runtime. Other notable
+omissions include:
+
+- X Windows and remote desktop support
+- A C/C++ compiler
+- systemd and udev
+
+These differences help to keep the system small and efficient. Despite this, QUniBoot
+includes most of the tools and utilities users of UniBone and QBone rely upon, and the
+BuildRoot system makes it easy to add new packages in the future.
 
 ## Installed Software
 
@@ -45,16 +59,6 @@ The following software packages are included in the QUniBoot distribution:
   support (bridge, tun/tap).
 - **Comms**: minicom, picocom.
 - **Languages/dev support**: Python, Perl, GDB, gdbserver, git.
-
-## Differences vs Existing UniBone/QBone Distribution
-
-QUniBoot is designed as an embedded OS rather than a desktop OS. As a
-result, it does not include:
-
-- X Windows or remote desktop support
-- A C/C++ compiler
-- A system package manager
-- systemd or udev
 
 ## Download and Installation
 
@@ -188,7 +192,7 @@ imaging tool is required, such as
 
 Once QUniBoot has booted, you can log in to the system as root using SSH.
 
-You can connect to the system using its hostname, which it advertises on the 
+You can connect to the system using its hostname, which it advertises on the
 local network using mDNS. By default, the system hostname is either `unibone`
 or `qbone`, unless overridden via the `HOSTNAME` auto-config setting.
 
