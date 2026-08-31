@@ -1,4 +1,4 @@
-QUNIBONE_SITE = https://github.com/j-hoppe/QUniBone.git
+QUNIBONE_SITE = https://github.com/QUniBone/QUniBoneClassic.git
 QUNIBONE_SITE_METHOD = git
 QUNIBONE_VERSION = HEAD
 QUNIBONE_LICENSE = BSD 2-Clause License
