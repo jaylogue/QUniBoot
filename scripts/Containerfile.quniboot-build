@@ -1,0 +1,30 @@
+# Podman Containerfile for constructing the QUniBoot build container image
+#
+
+FROM ubuntu:24.04
+
+RUN apt-get update \
+    && apt-get install -y \
+        build-essential \
+        make \
+        cmake \
+        git \
+        file \
+        cpio \
+        unzip \
+        rsync \
+        wget \
+        bc \
+        xxd \
+        fakeroot \
+        dosfstools \
+        mtools \
+        pkg-config \
+        libc6-i386 \
+        lib32stdc++6 \
+        lib32z1 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /
+
+CMD ["/bin/bash"]
