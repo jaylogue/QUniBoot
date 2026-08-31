@@ -1,2 +1,2 @@
-name: QUNIBONE
-desc: BuildRoot BSP for UniBone/QBone Linux-to-PDP-11 Bridge
+name: QUNIBOOT
+desc: Build for QUniBoot linux distribution

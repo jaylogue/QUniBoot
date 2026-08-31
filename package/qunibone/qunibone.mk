@@ -41,7 +41,7 @@ define QUNIBONE_BUILD_CMDS
     $(CPP) -nostdinc \
         -I $(LINUX_DIR)/include \
         -undef -x assembler-with-cpp \
-        $(BR2_EXTERNAL_QUNIBONE_PATH)/package/qunibone/qunibone.dtso | \
+        $(BR2_EXTERNAL_QUNIBOOT_PATH)/package/qunibone/qunibone.dtso | \
     $(LINUX_DIR)/scripts/dtc/dtc -@ -I dts -O dtb \
         -o $(@D)/qunibone.dtbo -
 endef

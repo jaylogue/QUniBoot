@@ -72,11 +72,11 @@ Welcome to ${PLATFORM_NAME}
 EOF
 
 echo "Customizing extlinux.conf"
-install -m 0644 -D ${BR2_EXTERNAL_QUNIBONE_PATH}/board/qunibone/extlinux.conf ${BINARIES_DIR}/extlinux/extlinux.conf
+install -m 0644 -D ${BR2_EXTERNAL_QUNIBOOT_PATH}/board/qunibone/extlinux.conf ${BINARIES_DIR}/extlinux/extlinux.conf
 sed -i -e "s/label \+qunibone/label ${PLATFORM_NAME_LC}/" ${BINARIES_DIR}/extlinux/extlinux.conf
 
 echo "Installing autoconfig-example.txt"
-install -m 0644 -D ${BR2_EXTERNAL_QUNIBONE_PATH}/board/qunibone/autoconfig-example.txt ${BINARIES_DIR}/autoconfig-example.txt
+install -m 0644 -D ${BR2_EXTERNAL_QUNIBOOT_PATH}/board/qunibone/autoconfig-example.txt ${BINARIES_DIR}/autoconfig-example.txt
 
 echo "Restoring busybox vi"
 ln -sf busybox ${TARGET_DIR}/bin/vi
