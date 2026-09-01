@@ -1,23 +1,18 @@
 # QUniBoot
 
-QUniBoot is a small Linux distribution targeting the BeagleBone Black SBC embedded in the 
+QUniBoot is a small Linux distribution targeting Jörg Hoppe's 
 [UniBone](https://retrocmp.com/projects/unibone) and [QBone](https://retrocmp.com/projects/qbone) 
-DEC hardware emulators.
-QUniBoot is intended as a smaller and faster alternative to the original Debian-based OS images
-created by Jörg Hoppe.
+DEC hardware emulators. QUniBoot runs on the
+[BeagleBone Black](https://www.beagleboard.org/boards/beaglebone-black) SBC embedded in these
+devices, and is intended as a smaller and faster alternative to the original Debian-based OS images.
 
-The QUniBoot system includes the original UniBone/QBone emulation software along with
-the full set of PDP-11 operating system disk images and support scripts.
-Underneath this is a small Linux OS environment, based on a modern Linux kernel and
-associated system software, built using the
+The QUniBoot system includes all the original UniBone/QBone emulation software and scripts along with
+the full set of PDP-11 operating system disk images. Underneath this is a small Linux OS environment
+based on a modern Linux kernel and associated system software. QUniBoot is built using the
 [BuildRoot](https://buildroot.org) embedded Linux system generation tool.
 
-Compared to the original UniBone/QBone distribution, QUniBoot has a number of new features,
-as well as a few omissions.
-
-
 - [Features](#features)
-- [Differences vs Existing UniBone/QBone Distribution](#differences-vs-existing-unibonequbone-distribution)
+- [Differences vs Existing UniBone/QBone Distribution](#differences-vs-existing-uniboneqbone-distribution)
 - [Installed Software](#installed-software)
 - [Quick Start](#quick-start)
   - [Download and Installation](#download-and-installation)
@@ -37,6 +32,9 @@ as well as a few omissions.
 ---
 
 ## Features
+
+Compared to the original UniBone/QBone distribution, QUniBoot has a number of new features,
+as well as a few omissions. The most notable new features are:
 
 - **Modern OS**: Updated Linux kernel (6.x), system utilities and user
   applications.
@@ -100,15 +98,16 @@ The following software packages are included in the QUniBoot distribution:
    to configure the initial settings for the system.
 3. Insert the card into the BeagleBone Black and boot the PDP-11 system.
 
-Once the system is booted, follow the instructions below for [Logging In](#logging-in).
+Once the system has booted, follow the instructions below for [Logging In](#logging-in).
 
 
 ### Download and Installation
 
-Prebuilt images for QUniBoot are available for download on GitHub: [QUniBoot/releases](https://github.com/jaylogue/QUniBoot/releases).
+Prebuilt images for QUniBoot are available for download at
+[https://github.com/jaylogue/QUniBoot/releases](https://github.com/jaylogue/QUniBoot/releases).
 
 Separate images exist for each supported hardware target (`unibone` and `qbone`).
-Additionally, images come in two variants for each target:
+Additionally, there are two variants for each target:
 
 - `full`: OS, system files, boot files and all PDP-11 software and 
   disk images. Use this variant for a fresh install.
