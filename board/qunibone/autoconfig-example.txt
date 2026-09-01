@@ -1,34 +1,50 @@
 # QUniBoot Auto-configuration Settings File
 #
-# Use this file to automatically configure various OS settings when the 
-# QUniBoot system boots. Auto-configuration can be performed at first
-# boot of a newly installed SD card, or on any subsequent boot.
+# Use this file to automatically configure a QUniBoot system when the 
+# system boots. Auto-configuration can be used to configure a newly
+# installed system image, or reconfigure an existing system.
 #
 # To enable auto-configuration:
 #
-# - mount the QUniBoot SD card on your computer and edit the settings
-#   below as needed for your system. Uncomment the settings you wish
-#   to change and leave others commented out.
-#
-#     Note that all settings values are optional. Any value that is not
-#     set will leave the existing system configuration unchanged.
-#
-# - When done editing, rename the file to "autoconfig.txt" and eject the
-#   SD card.
-#
-# - Insert the card into the BeagleBone Black and boot the system using
-#   the updated SD card.
-#
-# During the boot process, the system will automatically apply the given
-# settings. When the process completes, the system will flash the UniBone/
-# QBone LEDs 3 times. If an error occurs, the system will light the LEDs
-# and leave them on. The system log file (/var/log/messages) can be
-# inspected to determine the cause of any errors.
-#
-# After auto-configuration completes, the "autoconfig.txt" file will be 
-# renamed to "autoconfig-completed.txt". You can rename this file back
-# to "autoconfig.txt" to perform auto-configuration again.
-#
+# 1. Insert the SD card into your computer and wait for the BOOT drive
+#    to appear.
+# 
+#    NOTE: If you just installed a new QUniBoot image on the card, you may
+#    need to remove and re-insert it in order to get the BOOT drive to appear.
+# 
+# 2. Open the BOOT drive and copy the autoconfig-example.txt file to a
+#    new file called autoconfig.txt.
+# 
+# 3. Open the autoconfig.txt file with a text editor. Uncomment (remove
+#    the #) and fill in the settings with appropriate values for your system.
+#    Follow the descriptions below to understand the purpose and syntax
+#    of each setting.
+# 
+#    Note that it is not necessary to provide values for every setting. Any
+#    value not set will leave the existing/default configuration in place.
+#       
+#    Indeed, on a new system, it is not necessary to change any of the
+#    system settings, as the default values are entirely sufficient to use
+#    the system. However, for security reasons, it is strongly encouraged
+#    to set at least one of the following values:
+#    
+#    - ROOT_PASSWORD -- Set the root user password
+#    
+#    - ROOT_AUTHORIZED_KEY -- Set an authorized SSH key for the root user
+# 
+# 4. When done editing, close the file and safely eject the SD card.
+# 
+# 5. Insert the card into the UniBone/QBone and boot the PDP-11 system.
+# 
+# If auto-configuration is successful, the system will flash the UniBone/QBone
+# LEDs 3 times. If an error occurs, the system will light the LEDs and leave
+# them on. After a failure, the system log file (/var/log/messages) can be
+# inspected to determine the cause.
+# 
+# Once auto-configuration completes, the system will rename the autoconfig.txt
+# file to autoconfig-completed.txt to ensure it doesn't get re-applied at the
+# next boot.
+# 
 
 # Set the system hostname
 #
@@ -38,7 +54,7 @@
 # and DNS server.
 #
 # Note that CIDR notation (e.g. XXX.XXX.XXX.XXX/24) CANNOT be used in
-# the ip_addr setting. Use netmask instead.
+# the IP_ADDR setting. Use netmask instead.
 #
 #IP_ADDR=<XXX.XXX.XXX.XXX>
 #NETMASK=<XXX.XXX.XXX.XXX>
@@ -47,8 +63,8 @@
 
 # Configure the system to use DHCP to acquire network configuration.
 #
-# This is the default, but enabling this line will reset an existing
-# static IP address configuration back to using DHCP.
+# This is the default for a newly-installed system. However, enabling
+# this line will reset an existing system back to using DHCP.
 #
 #IP_ADDR=DHCP
 

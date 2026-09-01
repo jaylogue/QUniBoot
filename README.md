@@ -2,17 +2,39 @@
 
 QUniBoot is a small Linux distribution targeting the BeagleBone Black SBC embedded in the 
 [UniBone](https://retrocmp.com/projects/unibone) and [QBone](https://retrocmp.com/projects/qbone) 
-DEC hardware emulators. QUniBoot is intended to serve as a smaller and faster alternative to 
-the original Debian-based OS images created by Jörg Hoppe.
+DEC hardware emulators.
+QUniBoot is intended as a smaller and faster alternative to the original Debian-based OS images
+created by Jörg Hoppe.
 
-The QUniBoot system includes the UniBone/QBone emulation software along with the full
-set of PDP-11 operating system disk images and support scripts available in the original distribution.
-Supporting this is a modern Linux kernel and associated system software based on the
+The QUniBoot system includes the original UniBone/QBone emulation software along with
+the full set of PDP-11 operating system disk images and support scripts.
+Underneath this is a small Linux OS environment, based on a modern Linux kernel and
+associated system software, built using the
 [BuildRoot](https://buildroot.org) embedded Linux system generation tool.
 
 Compared to the original UniBone/QBone distribution, QUniBoot has a number of new features,
-as well as a few omissions. See [Differences vs Existing UniBone/QBone Distribution](#differences-vs-existing-unibone/qbone-distribution)
-for details.
+as well as a few omissions.
+
+
+- [Features](#features)
+- [Differences vs Existing UniBone/QBone Distribution](#differences-vs-existing-unibonequbone-distribution)
+- [Installed Software](#installed-software)
+- [Quick Start](#quick-start)
+  - [Download and Installation](#download-and-installation)
+    - [Installing on Linux](#installing-on-linux)
+    - [Installing on macOS](#installing-on-macos)
+    - [Installing on Windows](#installing-on-windows)
+  - [Auto-Configuration](#auto-configuration)
+  - [Logging In](#logging-in)
+- [Upgrading](#upgrading)
+- [Accessing the Serial Console](#accessing-the-serial-console)
+- [How-Tos and FAQs](#how-tos-and-faqs)
+- [Building QUniBoot](#building-quniboot)
+- [Acknowledgments](#acknowledgments)
+- [License](#license)
+- [Authorship Notice](#authorship-notice)
+
+---
 
 ## Features
 
@@ -27,27 +49,30 @@ for details.
 - **Easy OS-only upgrades**: Replace the contents of the OS partition
   without affecting user files.
 
+
 ## Differences vs Existing UniBone/QBone Distribution
 
 QUniBoot is designed as a purpose-built embedded OS rather than a general-purpose desktop
 system. Its most significant departure from typical desktop OSes is the absence
 of a package manager. In QUniBoot, software packages are selected and built into the
-system image at generation time, rather than installed at runtime. Other notable
-omissions include:
+system image at generation time, rather than installed at runtime.
+
+Other notable omissions include:
 
 - X Windows and remote desktop support
 - A C/C++ compiler
 - systemd and udev
 
-These differences help to keep the system small and efficient. Despite this, QUniBoot
-includes most of the tools and utilities users of UniBone and QBone rely upon, and the
-BuildRoot system makes it easy to add new packages in the future.
+These differences help to keep QUniBoot small and efficient. Despite this, the system
+includes most tools and utilities QUniBone users come to expect. And the BuildRoot system
+makes it easy to enhance the system with new packages.
+
 
 ## Installed Software
 
 The following software packages are included in the QUniBoot distribution:
 
-- **Standard QUniBone software**: The emulator application (`demo`), PDP-11
+- **QUniBone software**: The emulator application (`demo`), PDP-11
   OS images, boot ROMs, and start scripts.
 - **PDP-11 tools**:
   - **OpenSIMH**: PDP-11 simulator (with network support)
@@ -59,25 +84,45 @@ The following software packages are included in the QUniBoot distribution:
   support (bridge, tun/tap).
 - **Comms**: minicom, picocom.
 - **Languages/dev support**: Python, Perl, GDB, gdbserver, git.
+- **Shells**: bash, BusyBox shell.
 
-## Download and Installation
 
-Prebuilt images for QUniBoot are available for download on GitHub: *(URL TBD)*.
+## Quick Start
+
+1. Follow the steps in [Download and Installation](#download-and-installation)
+   to write the **full** OS variant of QUniBoot to a blank SD card. Choose
+   the appropriate image file for your hardware:
+
+   - `quniboot-unibone-full.img` or
+   - `quniboot-qbone-full.img`
+
+2. After the SD card has been written, follow the steps in [Auto-Configuration](#auto-configuration)
+   to configure the initial settings for the system.
+3. Insert the card into the BeagleBone Black and boot the PDP-11 system.
+
+Once the system is booted, follow the instructions below for [Logging In](#logging-in).
+
+
+### Download and Installation
+
+Prebuilt images for QUniBoot are available for download on GitHub: [QUniBoot/releases](https://github.com/jaylogue/QUniBoot/releases).
+
 Separate images exist for each supported hardware target (`unibone` and `qbone`).
-Additionally, images come in two variants:
+Additionally, images come in two variants for each target:
 
-- **full**: OS, system files, boot files and all QUniBone software, including PDP-11
-  disk images and other data files. Use this variant for a fresh install.
-- **os-only**: OS, system and boot files only. Use this variant to upgrade an
+- `full`: OS, system files, boot files and all PDP-11 software and 
+  disk images. Use this variant for a fresh install.
+- `os-only`: OS, system and boot files only. Use this variant to upgrade an
   existing install (see [Upgrading](#upgrading)).
 
 Installing QUniBoot requires a 2GB or larger micro-SD card. If a larger card is used,
 QUniBoot will automatically expand to make use of all available space.
 
 > **Warning**: Writing an image to an SD card will overwrite existing data
-> on the card.
+> on the card. Be sure to have adequate backups before you start.
 
-### Installing on Linux
+
+#### Installing on Linux
 
 1. Insert the SD card and identify its device name:
 
@@ -91,7 +136,7 @@ QUniBoot will automatically expand to make use of all available space.
 2. Write the image:
 
    ```
-   sudo dd if=output/images/quniboot-<hardware>-<variant>.img of=/dev/sdX bs=4M status=progress oflag=direct
+   sudo dd if=quniboot-<hardware>-<variant>.img of=/dev/sdX bs=4M status=progress oflag=direct
    ```
 
    Replace `/dev/sdX` with the device name found in step 1.
@@ -102,7 +147,7 @@ QUniBoot will automatically expand to make use of all available space.
    sudo eject /dev/sdX
    ```
 
-### Installing on macOS
+#### Installing on macOS
 
 1. Insert the SD card and identify its device name:
 
@@ -123,7 +168,7 @@ QUniBoot will automatically expand to make use of all available space.
    faster writes:
 
    ```
-   sudo dd if=output/images/quniboot-<hardware>-<variant>.img of=/dev/rdiskN bs=4m
+   sudo dd if=output/images/quniboot-<hardware>-<variant>.img of=/dev/rdiskN bs=4M
    ```
 
    Replace `diskN` with the disk identifier found in step 1.
@@ -134,14 +179,13 @@ QUniBoot will automatically expand to make use of all available space.
    diskutil eject /dev/diskN
    ```
 
-### Installing on Windows
+#### Installing on Windows
 
 Windows has no built-in tool for writing raw disk images, so a third-party
-imaging tool is required, such as
-[balenaEtcher](https://etcher.balena.io/).
+imaging tool is required, such as [balenaEtcher](https://etcher.balena.io/).
 
 1. Download and install balenaEtcher, if not already installed. (You can
-   also use Rufus for this.)
+   also use Rufus for this).
 
 2. Insert the SD card.
 
@@ -157,97 +201,167 @@ imaging tool is required, such as
 5. Click **Flash** to write the image. Etcher verifies the write and
    ejects the SD card automatically when finished.
 
-## Quick Start
 
-1. Follow the steps in [Download and Installation](#download-and-installation)
-   to write the **full** OS variant of QUniBoot to a blank SD card. Choose
-   the image file for your hardware: `quniboot-unibone-full.img` or
-   `quniboot-qbone-full.img`.
-2. After the SD card has been written, remove it and re-insert it into your
-   computer, then wait for the `BOOT` drive to appear.
-3. Open the `BOOT` drive and rename the file `autoconfig-example.txt` to
-   `autoconfig.txt`.
-4. Edit `autoconfig.txt` with a text editor. Uncomment and fill in the
-   settings appropriate to your environment.
+### Auto-Configuration
 
-   It is not required to provide values for every setting. Any setting left
-   unset uses an appropriate default. At a minimum, set `ROOT_PASSWORD` to
-   an appropriately strong password.
+QUniBoot provides a feature to automatically configure important system 
+settings at boot time. This feature can be used to configure a newly 
+installed system image, or reconfigure an existing system.
 
-   If you have an SSH key, it is strongly recommended that you also set
-   `ROOT_AUTHORIZED_KEY` to your public key. The value should be the
-   base64-encoded public key in standard `authorized_keys` format (e.g.
-   `ssh-rsa AAA...`).
+Auto-configuration works by looking for a file called `autoconfig.txt` in
+the `BOOT` partition of the SD card. If present, the system will read the file
+and update its configuration based on the values therein.
 
-   > Setting `ROOT_AUTHORIZED_KEY` disables root login using a password.
-   > Once set, you must always use your private key to log in.
-5. Close `autoconfig.txt` and safely eject the SD card.
-6. Insert the card into the BeagleBone Black and boot the PDP-11 system.
+An example auto-configuration file (`autoconfig-example.txt`) is included in 
+the `BOOT` partition of the stock QUniBoot image.
 
-   The system indicates a successful boot by flashing the UniBone/QBone
-   LEDs three times. If an error occurs during auto-configuration, the LEDs
-   light and stay on.
+To enable auto-configuration:
+ 
+1. Insert the SD card into your computer and wait for the `BOOT` drive
+   to appear.
 
-## Remote Login
+   *NOTE: If you just installed a new QUniBoot image on the card, you may need to
+   remove and re-insert it in order to get the `BOOT` drive to appear.*
 
-Once QUniBoot has booted, you can log in to the system as root using SSH.
+2. Open the `BOOT` drive and copy the `autoconfig-example.txt` file to a
+   new file called `autoconfig.txt`.
 
-You can connect to the system using its hostname, which it advertises on the
-local network using mDNS. By default, the system hostname is either `unibone`
-or `qbone`, unless overridden via the `HOSTNAME` auto-config setting.
+3. Open the `autoconfig.txt` file with a text editor. Uncomment (remove the
+   #) and fill in the settings with appropriate values for your system. Follow the
+   descriptions in the file to understand the purpose and syntax of each setting.
 
-If you set an SSH public key using `ROOT_AUTHORIZED_KEY`, you must supply
-the corresponding private key when connecting. If you did not set an SSH key,
-you can log in using the root password.
+   Note that it is not necessary to provide values for every setting. Any value
+   not set will leave the existing/default configuration in place.
+      
+   Indeed, on a new system, it is not necessary to change *any* of the system 
+   settings, as the default values are entirely sufficient to use the system.
+   However, for security reasons, it is strongly encouraged to set at least one
+   of the following values:
+   
+   - `ROOT_PASSWORD` -- Set the root user password
+   
+   - `ROOT_AUTHORIZED_KEY` -- Set an authorized SSH key for the root user
 
-On Linux and macOS, you can use the system's ssh client to connect to the QUniBoot system:
+4. When done editing, close the file and safely eject the SD card.
+
+5. Insert the card into the UniBone/QBone and boot the PDP-11 system.
+
+If auto-configuration completes successfully, the system will flash the UniBone/QBone
+LEDs 3 times. If an error occurs, the system will light the LEDs and leave them on.
+After a failure, the system log file (/var/log/messages) can be inspected to determine
+the cause.
+
+Once auto-configuration completes, the system will rename the `autoconfig.txt` file to
+`autoconfig-completed.txt` to ensure it doesn't get re-applied at the next
+boot.
+
+### Logging In
+
+The easiest way to interact with a QUniBoot system is to connect over the
+local-area network using SSH.
+Any SSH-capable client will work as long as it is connected to the same network as
+the UniBone/QBone.
+
+When connected to a network, QUniBoot advertises itself via mDNS using the name
+  `<hostname>.local`.
+The hostname defaults to either `unibone` or `qbone`, unless overridden via the
+`HOSTNAME` auto-config setting.
+
+If you setup an SSH public key using the `ROOT_AUTHORIZED_KEY` setting, you must
+supply the corresponding private key when connecting.
+If you did not set an SSH key, you can log in using the root password.
+
+On Linux and macOS, you can use the system's ssh client to connect to QUniBoot:
 
 ```
-ssh -i ~/.ssh/my_key root@unibone
+ssh root@unibone.local
 ```
 
 On Windows, you can use PuTTY or any other suitable SSH client:
 
-*(TBD)*
+*(example TBD)*
+
 
 ## Upgrading
 
-The QUniBoot system can be upgraded by writing a new **os-only** image over
-an existing QUniBoot SD card. The upgrade process replaces the OS and
-`BOOT` partitions on the card, but leaves the partition holding the PDP-11 disk images
-and script files intact.
+The QUniBoot system can be upgraded by writing a new **os-only** image over an
+existing QUniBoot SD card. The upgrade process replaces the OS and `BOOT` partitions
+on the card, but leaves the partition holding the PDP-11 disk images and script
+files intact.
 
-By default, upgrading an existing QUniBoot system will reset the core operating
-system settings such as the root password and the network configuration.
-However, if you used the auto-configuration mechanism (`autoconfig.txt`) to
-configure the system originally, you can preserve the original settings
-prior to upgrading the card and re-apply them to the new system.
+Upgrading an existing QUniBoot system will reset all core system settings, including
+the root password, SSH keys and network configuration.  If the auto-configuration
+mechanism was used to configure the system originally, you can preserve the original
+settings prior to upgrading the card and re-apply when the upgraded system boots.
 
 To upgrade a QUniBoot system:
 
 1. If you used auto-configuration to set up the system originally, and you want to
-   preserve those settings on the upgraded system, insert the SD card and save a
-   copy of the `autoconfig-completed.txt` file from the `BOOT` partition to your
-   local disk.
+   preserve those settings on the upgraded system, insert the SD card into a computer
+   and save a copy of the `autoconfig-completed.txt` file (located in `BOOT` partition)
+   to a local disk.
+
 2. Follow the steps in [Download and Installation](#download-and-installation),
-   selecting the appropriate **os-only** image for your hardware
-   (`quniboot-unibone-os-only.img` or `quniboot-qbone-os-only.img`).
+   selecting and installing the correct **os-only** image for your hardware
+
+   - `quniboot-unibone-os-only.img` or
+   - `quniboot-qbone-os-only.img`
+
 3. Before booting the upgraded SD card, copy the saved `autoconfig-completed.txt` file
    from step 1 into the `BOOT` partition on the upgraded card and rename the file
    to `autoconfig.txt`. (Note that you may need to remove and re-insert the SD card
    to get the `BOOT` partition to appear).
-4. Safely eject the SD card.
-5. Insert the card into the BeagleBone Black and boot the PDP-11 system.
 
-## Documentation
+4. If needed, follow the steps in [Auto-Configuration](#auto-configuration) to
+   adjust the system configuration.
+
+5. Safely eject the SD card.
+
+6. Insert the card into the BeagleBone Black and boot the PDP-11 system.
+
+
+## Accessing the Serial Console
+
+The QUniBoot system console is connected to the BeagleBone's UART0 serial port.
+UART0 is exposed on the card's Serial Debug Header (J1) which is located on the top
+of the BBB (but oriented towards the bottom when installed on the UniBone/QBone).
+Log messages from the system bootloader and kernel are written to the console
+during the boot process.
+Once boot completes, the console automatically drops into a root shell.
+
+The serial console can be accessed using an inexpensive USB to TTL 3.3V serial
+adapter. Connect the adapter to the J1 header as follows:
+
+| BBB J1 Pin | Serial Connection | Typical Wire Color |
+|---|---|---|
+| 1 | Ground | Black |
+| 4 | Receive | White |
+| 5 | Transmit | Green |
+
+> **WARNING**: The BeagleBone Black is quite susceptible to ground currents.
+> Before connecting a serial adapter it is strongly encouraged to first check for
+> any voltage potential between the ground on the computer's USB connector and a
+> ground point on the PDP-11. Any significant voltage between the two points
+> should be investigated and eliminated **before** the serial connection is made.
+
+
+## How-Tos and FAQs
 
 *Coming soon*
 
+
+## Building QUniBoot
+
+*Coming soon*
+
+
 ## Acknowledgments
 
-A most hearty thanks goes to Jörg Hoppe for his excellent UniBone and QBone devices.
+A most hearty thanks goes to Jörg Hoppe for his excellent UniBone and QBone hardware
+ and software.
 There are many a PDP-11 (and the occasional VAX) that would be nothing without
-them.
+ them.
+
 
 ## License
 
@@ -255,8 +369,11 @@ All content published as part of the QUniBoot project, including source
 code, patches, configuration files and documentation, is licensed under the
 Apache 2.0 license.
 
+
 ## Authorship Notice
 
 All source code, patches and configuration files were generated solely by
-the author. Project documentation, including this README, was generated by the
-author, with some inspiration, feedback and grammatical review from AI tools.
+the author.
+
+Project documentation, including this README, was generated by the author
+with style and grammar review performed by AI tools.
