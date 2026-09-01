@@ -59,7 +59,7 @@ BUILDROOT_PACKAGE_FILE  = $(shell basename $(BUILDROOT_PACKAGE_URL))
 BUILDROOT_MAKE_ARGS     = -C $(BUILDROOT_DIR) \
                           O=$(OUTPUT_DIR) \
                           BR2_EXTERNAL=$(TOP_DIR) \
-                          BR2_DEFCONFIG=$(CONFIG_DIR)/qunibone_defconfig \
+                          BR2_DEFCONFIG=$(CONFIG_DIR)/quniboot_defconfig \
                           BR2_GLOBAL_PATCH_DIR=$(PATCHES_DIR) \
                           BR2_DL_DIR=$(DOWNLOAD_DIR)
 
@@ -94,7 +94,7 @@ stage-buildroot $(BUILDROOT_DIR) : $(DOWNLOAD_DIR)/$(BUILDROOT_PACKAGE_FILE)
 	done
 
 configure-buildroot $(OUTPUT_DIR)/.config : $(BUILDROOT_DIR)
-	$(MAKE) $(BUILDROOT_MAKE_ARGS) qunibone_defconfig
+	$(MAKE) $(BUILDROOT_MAKE_ARGS) quniboot_defconfig
 
 clean-target :
 	rm -rf $(OUTPUT_DIR)/target $(OUTPUT_DIR)/build/*/.stamp_target_installed
