@@ -39,15 +39,17 @@ PLATFORM_NAME_LC=$(echo ${PLATFORM_NAME} | tr '[:upper:]' '[:lower:]')
 echo "Setting hostname"
 echo ${PLATFORM_NAME_LC} > ${TARGET_DIR}/etc/hostname
 
-if [[ ! -f "${TARGET_DIR}/etc/init.d/DISABLED.S50crond" ]]; then
-    echo "Disabling cron"
-    mv ${TARGET_DIR}/etc/init.d/S50crond ${TARGET_DIR}/etc/init.d/DISABLED.S50crond
-fi
+DEFERRED_INIT_SCRIPTS="S40network S49ntpd.sh S50avahi-daemon S50sshd S50telnet"
+for f in ${DEFERRED_INIT_SCRIPTS}; do
+    echo "Deferring init script: ${f}"
+    mv ${TARGET_DIR}/etc/init.d/${f} ${TARGET_DIR}/etc/init.d/${f/#S/D}
+done
 
-if [[ ! -f "${TARGET_DIR}/etc/init.d/DISABLED.S50telnet" ]]; then
-    echo "Disabling telnetd"
-    mv ${TARGET_DIR}/etc/init.d/S50telnet ${TARGET_DIR}/etc/init.d/DISABLED.S50telnet
-fi
+DISABLED_INIT_SCRIPTS="S50crond D50telnet"
+for f in ${DISABLED_INIT_SCRIPTS}; do
+    echo "Disabling init script: ${f}"
+    mv ${TARGET_DIR}/etc/init.d/${f} ${TARGET_DIR}/etc/init.d/DISABLED.${f}
+done
 
 echo "Customizing os-release file"
 QUNIBOOT_VERSION=$("${BR2_EXTERNAL_QUNIBOOT_PATH}/scripts/get-version.sh")
