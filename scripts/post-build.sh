@@ -50,11 +50,7 @@ if [[ ! -f "${TARGET_DIR}/etc/init.d/DISABLED.S50telnet" ]]; then
 fi
 
 echo "Customizing os-release file"
-if [[ "${BR2_VERSION_FULL}" =~ ^-g ]]; then
-    QUNIBOOT_VERSION=v0${BR2_VERSION_FULL}
-else
-    QUNIBOOT_VERSION=${BR2_VERSION_FULL}
-fi
+QUNIBOOT_VERSION=$("${BR2_EXTERNAL_QUNIBOOT_PATH}/scripts/get-version.sh")
 cat > ${TARGET_DIR}/etc/os-release <<EOF
 NAME=QUniBoot
 ID=quniboot
