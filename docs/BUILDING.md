@@ -3,27 +3,46 @@
 This document describes how to build QUniBoot system images from the QUniBoot
 source tree.
 
-## BuildRoot
+- [Intro to BuildRoot](#intro-to-buildroot)
+- [Prerequisites](#prerequisites)
+  - [Host System](#host-system)
+  - [Packages](#packages)
+  - [Disk Space](#disk-space)
+- [Building](#building)
+- [Rebuilding](#rebuilding)
+- [Building Using Podman](#building-using-podman)
+  - [Creating a Podman Image](#creating-a-podman-image)
+  - [Building within a Podman Container](#building-within-a-podman-container)
+- [Useful Make Targets](#useful-make-targets)
+
+
+---
+
+## Intro to BuildRoot
 
 QUniBoot uses the [BuildRoot](https://buildroot.org) tool to build installable system
 images. BuildRoot is an embedded Linux system generation tool that works via cross-compilation.
 It automates all aspects of Linux system generation, including downloading, patching
 and cross-compiling the Linux kernel, building system tools and utilities, assembling
 filesystems, and building bootable system images. BuildRoot also takes care of sourcing
-the tools needed to perform cross-compilation on the host platform.
+the tools necessary to perform cross-compilation on the host platform.
 
-BuildRoot itself run on Linux. However it can be hosted on other OSes via containerization.
+BuildRoot itself runs on Linux. However, it can be hosted on other OSes via containerization.
 
 BuildRoot has an extensive [User Manual](https://buildroot.org/downloads/manual/manual.html)
 focused largely on adapting it to new hardware platforms or adding software packages.
 While understanding the features of BuildRoot can be useful, it is not required in order
 to build QUniBoot.
 
-## Host System
+## Prerequisites
+
+There are a number of prerequisites for a successful build of QUniBoot.
+
+### Host System
 
 QUniBoot must be built on a Linux system. This can be accomplished in one of two ways:
 
-- Install the necessary prerequisites and build directly on a native Linux machine or VM.
+- Install the necessary packages and build directly on a native Linux machine or VM.
 
 - Use the [Podman](https://podman.io/) tool to run the build within a Linux container.
 
@@ -38,7 +57,7 @@ is a convenient way to avoid dependencies on the host system.
 
 Instructions for building QUniBoot using Podman are given below.
 
-## Prerequisites
+### Packages
 
 The QUniBoot build depends on a handful of Linux packages. These can be installed directly
 on a host Linux system or VM using the following commands:
@@ -70,12 +89,12 @@ When building using Podman, QUniBoot provides scripts that take care of incorpor
 into the Podman container image. In this case, the only requirement on the host system is to install
 Podman itself.
 
-## Disk Space
+### Disk Space
 
 Building QUniBoot requires a lot of disk space. Prior to starting a build, ensure you have
 at least 36GB of space available on the build volume.
 
-## Building QUniBoot Images
+## Building
 
 To build QUniBoot system images directly on a host Linux system, start by downloading the QUniBoot
 source tree.
@@ -132,9 +151,9 @@ of individual compile steps, greatly speeding up the process of rebuilding. To c
 run the `make clean-ccache` command.
 
 
-## Building QUniBoot Using Podman
+## Building Using Podman
 
-QUniBoot includes scripts for initialing and using Podman to orchestrate image builds. Podman
+QUniBoot includes scripts for initializing and using Podman to orchestrate image builds. Podman
 creates a containerized Linux system within which the QUniBoot build processes run. Using Podman
 provides means for building and developing QUniBoot on non-Linux systems. It can also be used
 on a native Linux system to avoid polluting the system with the build prerequisites.
@@ -142,12 +161,12 @@ on a native Linux system to avoid polluting the system with the build prerequisi
 Instructions for installing Podman can be found in the [Podman documentation](https://podman.io/docs).
 
 To build QUniBoot using Podman, start by downloading the QUniBoot source tree as described in
-[Building QUniBoot Images](#building-quniboot-images).
+[Building](#building).
 
-### Creating the quniboot-build Podman Image
+### Creating a Podman Image
 
 In order to build QUniBoot with Podman, a Podman container image must be prepared on the host system.
-The image is based on a stock Ubuntu 24.04 image with the necessary build prerequisites installed.
+The image is based on stock Ubuntu 24.04 with the necessary build prerequisites installed.
 The Podman recipe for creating the image can be found in `scripts/Containerfile.quniboot-build`.
 
 Use the supplied `scripts/init-container.sh` script to create the container image:
@@ -166,26 +185,26 @@ localhost/quniboot-build  latest      db81095689eb  24 hours ago  1.05 GB
 docker.io/library/ubuntu  24.04       a6f81fb630d5  2 weeks ago   80.7 MB
 ```
 
-### Invoking Build Commands within a Podman Container
+### Building within a Podman Container
 
 Once the quniboot-build image has been created, the `scripts/run-container.sh` script can be
-used to execute build commands within a container created from that image. The script creates
-and starts an ephemeral instance of the container, runs the specified command within it, and
-then destroys the container once the command completes.
+used to execute build commands within a Podman container. The script creates and starts an
+ephemeral build container instance, runs the specified command within it, and then destroys
+the container once the command completes.
 
 While the container is running, the root directory of the QUniBoot source tree is mapped
-into the filesystem of the container. Thus, as build scripts run within the container, their
-output is placed into the source tree, as would happen if the build was run directly on a
-native Linux host.
+into the filesystem of the container. As the build scripts run, their output is placed into
+the host source tree, as would happen if the build were run directly on the host itself.
 
 Any command can be run within a build container by prefacing it with `./scripts/run-container.sh`. E.g.:
 
 ```
+$ cd QUniBoot
 $ ./scripts/run-container.sh echo HELLO
 HELLO
 ```
 
-To build the QUniBoot images using Podman, invoke 'make all' within a build container,
+To build the QUniBoot system images using Podman, invoke 'make all' within a build container,
 specifying the desired target hardware:
 
 ```
@@ -196,9 +215,9 @@ $ ./scripts/run-container.sh make QUNIBOOT_TARGET=unibone all
 ## Useful Make Targets
 
 The Makefile at the top level of the source tree provides a number of targets that can be useful
-for development. The top-level Makefile also acts as a wrapper for the standard BuildRoot Makefile,
-forwarding targets it doesn't understand to the subordinate Makefile. Thus, all targets offered
-by the BuildRoot Makefile are also available from the top level.
+when building QUniBoot. The Makefile also acts as a wrapper for the standard BuildRoot Makefile,
+forwarding targets it doesn't understand to the subordinate Makefile. Because of this, all targets
+offered by the BuildRoot Makefile are also available from the top level.
 
 Here are some useful make targets the system provides.
 
@@ -216,11 +235,11 @@ or add and remove packages.
 
 - `make clean` -- Delete all build products including build, host, staging and target
 directories, along with images and the toolchain. Note that this does NOT remove BuildRoot
-itself or the BuildRoot configuration.
+itself or reset the BuildRoot configuration.
 
-- `make distclean` -- Remove all build products along with BuildRoot and its configuration.
+- `make distclean` -- Remove all build products along with BuildRoot and reset the BuildRoot configuration.
 
-- `make clean-target` -- Remove just the BuildRoot 'output/target' directory (the template for
+- `make clean-target` -- Remove just the BuildRoot `output/target` directory (the template for
 the root filesystem), forcing it to be rebuilt on the next invocation.
 
 - `make clean-ccache` -- Remove the cache directory used by the ccache tool.
