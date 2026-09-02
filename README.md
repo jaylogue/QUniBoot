@@ -135,7 +135,7 @@ QUniBoot will automatically expand to make use of all available space.
 2. Write the image:
 
    ```
-   sudo dd if=quniboot-<hardware>-<variant>.img of=/dev/sdX bs=4M status=progress oflag=direct
+   zcat quniboot-<hardware>-<variant>.img.gz | sudo dd of=/dev/sdX bs=4M status=progress iflag=fullblock oflag=direct
    ```
 
    Replace `/dev/sdX` with the device name found in step 1.
@@ -163,11 +163,10 @@ QUniBoot will automatically expand to make use of all available space.
    diskutil unmountDisk /dev/diskN
    ```
 
-3. Write the image, using the raw device (`rdiskN` instead of `diskN`) for
-   faster writes:
+3. Write the image.  Note the use of the raw device `/dev/rdiskN` instead of the block device `/dev/diskN`:
 
    ```
-   sudo dd if=output/images/quniboot-<hardware>-<variant>.img of=/dev/rdiskN bs=4M
+   gzcat quniboot-<hardware>-<variant>.img.gz | sudo dd of=/dev/rdiskN bs=4M status=progress iflag=fullblock oflag=fsync
    ```
 
    Replace `diskN` with the disk identifier found in step 1.

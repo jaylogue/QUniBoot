@@ -98,9 +98,11 @@ hardware device (`unibone` or `qbone`) via the `QUNIBOOT_TARGET` make variable:
  $ make QUNIBOOT_TARGET=unibone all
  ```
 
-The build takes a fair bit of time to complete—on the order of 20 minutes on a modern x86 system. As
-the build progresses, the build scripts automatically download and build the source code for each
-of the constituent components.
+As the build progresses, the build scripts automatically download and build the source code for each
+component in the image.
+
+Expect the initial build to take a fair bit of time to complete — on the order of an hour on a modern
+x86 system.
 
 Once the build completes, the generated image files can be found in the `output/images` directory,
 named according to the target hardware and image variant. E.g.:
@@ -119,10 +121,11 @@ $ make distclean
 $ make QUNIBOOT_TARGET=qbone all
 ```
 
-As it runs, the build process automatically caches all tools and source archives needed to complete
-the build. Thus, after an initial build is complete, a rebuild can be performed entirely locally,
-without the need for network access. To force these files to be re-downloaded, simply delete the 'dl'
-directory at the top-level.
+As it runs, the build process downloads and caches the various components needed to complete
+the build. Once an initial build is done, a rebuild can be performed entirely locally,
+without the need for network access. Rebuilds typically run quite a bit faster than an initial
+build — around 20 minutes. To clear the cache and force all files to be re-downloaded, delete
+the `dl` directory at the top-level.
 
 By default, the build process is configured to use the ccache tool. The ccache tool caches the output
 of individual compile steps, greatly speeding up the process of rebuilding. To clear the ccache cache
