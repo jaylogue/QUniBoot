@@ -346,7 +346,7 @@ adapter. Connect the adapter to the J1 header as follows:
 
 ## Building QUniBoot
 
-Instructions for building installable QUniBoot images from source can be found
+Instructions for building QUniBoot system images from source can be found
 in [docs/BUILDING.md](docs/BUILDING.md)
 
 

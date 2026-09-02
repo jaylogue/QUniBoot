@@ -5,17 +5,17 @@ source tree.
 
 ## BuildRoot
 
-QUniBoot images are built using the [BuildRoot](https://buildroot.org) tool.
-BuildRoot is an embedded Linux system generation tool that works via cross-compilation.
+QUniBoot uses the [BuildRoot](https://buildroot.org) tool to build installable system
+images. BuildRoot is an embedded Linux system generation tool that works via cross-compilation.
 It automates all aspects of Linux system generation, including downloading, patching
 and cross-compiling the Linux kernel, building system tools and utilities, assembling
 filesystems, and building bootable system images. BuildRoot also takes care of sourcing
-all the tools needed to support cross-compilation on the host platform.
+the tools needed to perform cross-compilation on the host platform.
 
-BuildRoot itself requires Linux. However it can be run on other OSes via containerization.
+BuildRoot itself run on Linux. However it can be hosted on other OSes via containerization.
 
 BuildRoot has an extensive [User Manual](https://buildroot.org/downloads/manual/manual.html)
-focused largely on adapting it to new hardware platforms or adding new software packages.
+focused largely on adapting it to new hardware platforms or adding software packages.
 While understanding the features of BuildRoot can be useful, it is not required in order
 to build QUniBoot.
 
