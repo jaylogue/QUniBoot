@@ -117,7 +117,7 @@ Additionally, there are two variants for each target:
 Installing QUniBoot requires a 2GB or larger micro-SD card. If a larger card is used,
 QUniBoot will automatically expand to make use of all available space.
 
-> **Warning**: Writing an image to an SD card will overwrite existing data
+> **WARNING**: Writing an image to an SD card will overwrite existing data
 > on the card. Be sure to have adequate backups before you start.
 
 
@@ -344,12 +344,13 @@ adapter. Connect the adapter to the J1 header as follows:
 > should be investigated and eliminated **before** the serial connection is made.
 
 
-## How-Tos and FAQs
-
-*Coming soon*
-
-
 ## Building QUniBoot
+
+Instructions for building installable QUniBoot images from source can be found
+in [docs/BUILDING.md](docs/BUILDING.md)
+
+
+## How-Tos and FAQs
 
 *Coming soon*
 
