@@ -79,8 +79,8 @@ The following software packages are included in the QUniBoot distribution:
 
 ## Setup Guide
 
-To install QUniBoot on your UniBone or QBone, and configure and connect to the
-system, follow the [Setup Guide](docs/SETUP_GUIDE.md).
+To learn how to install and configure QUniBoot on your UniBone or QBone,
+check out [docs/SETUP_GUIDE.md](docs/SETUP_GUIDE.md).
 
 
 ## Building QUniBoot

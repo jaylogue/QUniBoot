@@ -203,15 +203,13 @@ ssh root@unibone.local
 
 On Windows, you can use PuTTY or another suitable SSH client:
 
-<img src="putty-session-dialog-annotated.png"/>
-
-<img src="putty-ssh-auth-dialog-annotated.png"/>
+<img src="putty-session-dialog-annotated.png"/> &nbsp;&nbsp;&nbsp; <img src="putty-ssh-auth-dialog-annotated.png"/>
 
 
 ### Connecting via UART2
 
 At boot time, QUniBoot automatically starts a root shell on the BeagleBone's UART2
-serial port (/dev/ttyS2). UART2 is accessible via an IDC header on the UniBone/QBone.
+serial port (`/dev/ttyS2`). UART2 is accessible via an IDC header on the UniBone/QBone.
 The port is configured for 115200 baud, 8 bits, no parity, 1 stop bit.
 
 To connect an RS-232 terminal or a PC with a USB-to-RS-232 adapter, you will need a
@@ -224,7 +222,7 @@ need a null-modem cable or adapter.
 ### Connecting via the System Console
 
 The QUniBoot system console is connected to the BeagleBone's UART0 serial port.
-UART0 is exposed on the BeagleBone's Serial Debug Header (labeled J1) which is
+UART0 is exposed on the BeagleBone's Serial Debug Header (labeled `J1`) which is
 located on the top of the BBB PCB, but oriented towards the bottom when installed
 on the UniBone/QBone.
 
