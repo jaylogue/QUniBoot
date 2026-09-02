@@ -20,11 +20,13 @@ based on a modern Linux kernel and associated system software. QUniBoot is built
     - [Installing on macOS](#installing-on-macos)
     - [Installing on Windows](#installing-on-windows)
   - [Auto-Configuration](#auto-configuration)
-  - [Logging In](#logging-in)
+  - [Accessing the System](#accessing-the-system)
+    - [Connecting via SSH](#connecting-via-ssh)
+    - [Connecting via UART2](#connecting-via-uart2)
+    - [Connecting via the System Console](#connecting-via-the-system-console)
 - [Upgrading](#upgrading)
-- [Accessing the Serial Console](#accessing-the-serial-console)
-- [How-Tos and FAQs](#how-tos-and-faqs)
 - [Building QUniBoot](#building-quniboot)
+- [How-Tos and FAQs](#how-tos-and-faqs)
 - [Acknowledgments](#acknowledgments)
 - [License](#license)
 - [Authorship Notice](#authorship-notice)
@@ -96,9 +98,10 @@ The following software packages are included in the QUniBoot distribution:
 
 2. After the SD card has been written, follow the steps in [Auto-Configuration](#auto-configuration)
    to configure the initial settings for the system.
+
 3. Insert the card into the BeagleBone Black and boot the PDP-11 system.
 
-Once the system has booted, follow the instructions below for [Logging In](#logging-in).
+When booting completes, follow the instructions below for [Accessing the System](#accessing-the-system).
 
 
 ### Download and Installation
@@ -253,21 +256,27 @@ Once auto-configuration completes, the system will rename the `autoconfig.txt` f
 `autoconfig-completed.txt` to ensure it doesn't get re-applied at the next
 boot.
 
-### Logging In
+### Accessing the System
 
-The easiest way to interact with a QUniBoot system is to connect over the
-local-area network using SSH.
-Any SSH-capable client will work as long as it is connected to the same network as
-the UniBone/QBone.
+Once booted, there are three ways to access the system:
+
+- Via the network using SSH
+- Via UART2
+- Via the system console
+
+#### Connecting via SSH
+
+Perhaps the easiest way to interact with a QUniBoot system is to connect over the local-area
+network using SSH. Any SSH-capable client will work as long as it is connected to the
+same LAN as the UniBone/QBone.
 
 When connected to a network, QUniBoot advertises itself via mDNS using the name
-  `<hostname>.local`.
-The hostname defaults to either `unibone` or `qbone`, unless overridden via the
-`HOSTNAME` auto-config setting.
+`<hostname>.local`. The hostname part defaults to either `unibone` or `qbone`, unless
+overridden via the `HOSTNAME` auto-config setting.
 
-If you setup an SSH public key using the `ROOT_AUTHORIZED_KEY` setting, you must
-supply the corresponding private key when connecting.
-If you did not set an SSH key, you can log in using the root password.
+If you setup an SSH public key using the `ROOT_AUTHORIZED_KEY` setting, then you must
+supply the corresponding private key when connecting. If you did not set an SSH key,
+you can log in using the root password.
 
 On Linux and macOS, you can use the system's ssh client to connect to QUniBoot:
 
@@ -275,9 +284,53 @@ On Linux and macOS, you can use the system's ssh client to connect to QUniBoot:
 ssh root@unibone.local
 ```
 
-On Windows, you can use PuTTY or any other suitable SSH client:
+On Windows, you can use PuTTY or another suitable SSH client:
 
-*(example TBD)*
+<img src="docs/putty-session-dialog-annotated.png"/>
+
+<img src="docs/putty-ssh-auth-dialog-annotated.png"/>
+
+
+#### Connecting via UART2
+
+At boot time, QUniBoot automatically starts a root shell on the BeagleBone's UART2
+serial port (/dev/ttyS2). UART2 is accessible via an IDC header on the UniBone/QBone.
+The port is configured for 115200 baud, 8 bits, no parity, 1 stop bit.
+
+To connect an RS-232 terminal or a PC with a USB-to-RS-232 adapter, you will need a
+10-pin IDC to DB25 or DE9 cable. This is a standard "PC-style" cable with a
+straight-through ribbon cable connection.
+
+Depending on how your terminal or USB adapter is configured, you will likely also
+need a null-modem cable or adapter.
+
+#### Connecting via the System Console
+
+The QUniBoot system console is connected to the BeagleBone's UART0 serial port.
+UART0 is exposed on the BeagleBone's Serial Debug Header (labeled J1) which is
+located on the top of the BBB PCB, but oriented towards the bottom when installed
+on the UniBone/QBone.
+
+The system console receives log messages from the bootloader and kernel as the
+system boots. Once booting completes, the system starts a root shell on the port.
+
+The serial console can be accessed using a USB to TTL 3.3V serial adapter.
+The port is configured for 115200 baud, 8 bits, no parity, 1 stop bit.
+
+Connect the adapter to the J1 header as follows:
+
+| BBB J1 Pin | Serial Connection | Typical Wire Color |
+|---|---|---|
+| 1 | Ground | Black |
+| 4 | Receive | White |
+| 5 | Transmit | Green |
+
+> **WARNING**: The BeagleBone Black is quite susceptible to ground currents.
+> Before connecting a serial adapter to UART0 it is strongly encouraged to first
+> check for any voltage potential between the ground on the computer's USB
+> connector and a ground point on the PDP-11. Any significant voltage between the
+> two points should be investigated and eliminated **before** the serial
+> connection is made.
 
 
 ## Upgrading
@@ -300,7 +353,7 @@ To upgrade a QUniBoot system:
    to a local disk.
 
 2. Follow the steps in [Download and Installation](#download-and-installation),
-   selecting and installing the correct **os-only** image for your hardware
+   selecting and installing the correct **os-only** image for your hardware:
 
    - `quniboot-unibone-os-only.img` or
    - `quniboot-qbone-os-only.img`
@@ -318,35 +371,10 @@ To upgrade a QUniBoot system:
 6. Insert the card into the BeagleBone Black and boot the PDP-11 system.
 
 
-## Accessing the Serial Console
-
-The QUniBoot system console is connected to the BeagleBone's UART0 serial port.
-UART0 is exposed on the card's Serial Debug Header (J1) which is located on the top
-of the BBB (but oriented towards the bottom when installed on the UniBone/QBone).
-Log messages from the system bootloader and kernel are written to the console
-during the boot process.
-Once boot completes, the console automatically drops into a root shell.
-
-The serial console can be accessed using an inexpensive USB to TTL 3.3V serial
-adapter. Connect the adapter to the J1 header as follows:
-
-| BBB J1 Pin | Serial Connection | Typical Wire Color |
-|---|---|---|
-| 1 | Ground | Black |
-| 4 | Receive | White |
-| 5 | Transmit | Green |
-
-> **WARNING**: The BeagleBone Black is quite susceptible to ground currents.
-> Before connecting a serial adapter it is strongly encouraged to first check for
-> any voltage potential between the ground on the computer's USB connector and a
-> ground point on the PDP-11. Any significant voltage between the two points
-> should be investigated and eliminated **before** the serial connection is made.
-
-
 ## Building QUniBoot
 
 Instructions for building QUniBoot system images from source can be found
-in [docs/BUILDING.md](docs/BUILDING.md)
+in [docs/BUILDING.md](docs/BUILDING.md).
 
 
 ## How-Tos and FAQs
