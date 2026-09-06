@@ -73,7 +73,7 @@ echo "Customizing extlinux.conf"
 install -m 0644 -D ${BR2_EXTERNAL_QUNIBOOT_PATH}/board/qunibone/extlinux.conf ${BINARIES_DIR}/extlinux/extlinux.conf
 sed -i -e "s/label \+qunibone/label ${PLATFORM_NAME_LC}/" ${BINARIES_DIR}/extlinux/extlinux.conf
 
-echo "Installing autoconfig-example.txt"
+echo "Staging autoconfig-example.txt"
 install -m 0644 -D ${BR2_EXTERNAL_QUNIBOOT_PATH}/board/qunibone/autoconfig-example.txt ${BINARIES_DIR}/autoconfig-example.txt
 
 echo "Restoring busybox vi"
@@ -84,3 +84,6 @@ if [[ -e ${TARGET_DIR}/root && ! -L ${TARGET_DIR}/root ]]; then
     rm -rf ${TARGET_DIR}/root
 fi
 ln -sfn qunibone ${TARGET_DIR}/root
+
+echo "Linking autostart-example.sh in root directory"
+ln -sfn /etc/default/autostart.sh ${TARGET_DIR}/root/autostart-example.sh
