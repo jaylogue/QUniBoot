@@ -1,4 +1,4 @@
-# QUniBoot Setup Guide
+# QUniBoot How-Tos and FAQs
 
 This document contains answers to some frequently asked questions about QUniBoot,
 along with instructions for performing various common system management
@@ -91,7 +91,7 @@ You must reboot after making any changes.
 
 If you are unable to login to the system, you can reset the root password as follows:
 
-Follow the steps in the [Auto-Configuration](docs/SETUP_GUIDE.md#auto-configuration)
+Follow the steps in the [Auto-Configuration](SETUP_GUIDE.md#auto-configuration)
 section of the SETUP GUIDE. When creating the `autoconfig.txt` file, uncomment and set
 the `ROOT_PASSWORD=` line to the new root password. Then reboot the system.
 
@@ -104,7 +104,7 @@ the `ROOT_PASSWORD=` line to the new root password. Then reboot the system.
 If you are unable to login to the system, you can reset the root authorized_keys file
 as follows:
 
-Follow the steps in the [Auto-Configuration](docs/SETUP_GUIDE.md#auto-configuration)
+Follow the steps in the [Auto-Configuration](SETUP_GUIDE.md#auto-configuration)
 section of the SETUP GUIDE. When creating the `autoconfig.txt` file, uncomment the
 `ROOT_AUTHORIZED_KEY=CLEAR` line. If you wish to install a new key, also uncomment
 and set the `ROOT_AUTHORIZED_KEY=` line to the new SSH public key. Then reboot the
@@ -118,7 +118,7 @@ system.
 If you are unable to login to the system, you can reset the system network configuration
 as follows:
 
-Follow the steps in the [Auto-Configuration](docs/SETUP_GUIDE.md#auto-configuration)
+Follow the steps in the [Auto-Configuration](SETUP_GUIDE.md#auto-configuration)
 section of the SETUP GUIDE. When creating the `autoconfig.txt` file, uncomment
 and set the following lines with appropriate values:
 
@@ -142,7 +142,7 @@ The system network configuration is stored in `/etc/network/interfaces`.
 
 ### Why can't I login with a password using SSH?
 
-If you use the [Auto-Configuration](docs/SETUP_GUIDE.md#auto-configuration) feature
+If you use the [Auto-Configuration](SETUP_GUIDE.md#auto-configuration) feature
 to install an SSH public key in root's authorized_keys file (`/root/.ssh/authorized_keys`)
 the system automatically disables login via password.
 
@@ -167,4 +167,5 @@ It's true that the tools to perform cross-compilation are readily available, and
 setup and use than in the past.  If the goal is to rebuild the QUniBone emulation software
 (the demo app) consider using [qunibone-cross-compile](https://github.com/jaylogue/qunibone-cross-compile)
 project. It takes care of sourcing and invoking the appropriate cross-compilation tools
-and support libraries. It can also be used as a template for building other components.
+and support libraries. The Makefile from this project can also be used as a template for
+building other components.
