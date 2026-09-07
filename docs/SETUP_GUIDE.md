@@ -28,7 +28,7 @@ Additionally, for each hardware type there are two variants:
   disk images.
 - `os-only`: OS, system and boot files only.
 
-When performing a fresh install, select one of the `full` variants:
+When performing a fresh install, select the `full` variant for your hardware:
 
 - `quniboot-unibone-full.img.gz`
 - `quniboot-qbone-full.img.gz`
@@ -123,7 +123,7 @@ imaging tool is required, such as [balenaEtcher](https://etcher.balena.io/).
 
 QUniBoot provides a feature to automatically configure important system 
 settings at boot time. This feature can be used to configure a newly 
-installed system image, or reconfigure an existing system.
+installed system or reconfigure an existing system.
 
 Auto-configuration works by looking for a file called `autoconfig.txt` in
 the `BOOT` partition of the SD card. If present, the system will read the file
@@ -152,7 +152,7 @@ To enable auto-configuration:
       
    Indeed, on a new system, it is not necessary to change *any* of the system 
    settings, as the default values are entirely sufficient to use the system.
-   However, for security reasons, it is strongly encouraged to set at least one
+   However, for security reasons, you are strongly encouraged to set at least one
    of the following values:
    
    - `ROOT_PASSWORD` — Set the root user password
@@ -169,8 +169,7 @@ After a failure, the system log file (/var/log/messages) can be inspected to det
 the cause.
 
 Once auto-configuration completes, the system will rename the `autoconfig.txt` file to
-`autoconfig-completed.txt` to ensure it doesn't get re-applied at the next
-boot.
+`autoconfig-completed.txt` to ensure it doesn't get re-applied at the next boot.
 
 
 ## Accessing the System
@@ -262,6 +261,9 @@ those settings once the update completes.
 If you used the auto-configuration mechanism to configure the system initially, you
 can preserve the original settings prior to upgrading and then re-apply them when the
 upgraded system boots.
+
+If you made other changes to the system, be sure to backup your changes prior to
+upgrading.
 
 To upgrade a QUniBoot system:
 
