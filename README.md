@@ -91,7 +91,8 @@ in [docs/BUILDING.md](docs/BUILDING.md).
 
 ## How-Tos and FAQs
 
-*Coming soon*
+For answers to frequently asked questions, and insructions on common system
+management tasks, read [docs/HOWTOS_AND_FAQS.md](docs/HOWTOS_AND_FAQS.md).
 
 
 ## Acknowledgments
