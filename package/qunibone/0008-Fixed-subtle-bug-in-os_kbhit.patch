@@ -1,0 +1,69 @@
+From 7c680138046314bf4ef7cdf0ef193763b4894109 Mon Sep 17 00:00:00 2001
+From: Jay Logue <jay.logue@gmail.com>
+Date: Sat, 12 Sep 2026 11:59:42 -0700
+Subject: [PATCH] Fixed subtle bug in os_kbhit()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+-- os_kbhit() reads a single character in non-blocking mode, returning 0
+if no character is available. To achieve this, the function briefly puts
+the input tty into non-canonical mode. However, in doing this, it neglected
+to set the MIN and TIME values on the terminal. This resulted in ambiguous
+behavior depending on the initial state of the terminal. In some cases,
+this caused the EOF flag to be set on the stdin stream, preventing further
+input and causing the program to emit an endless series of prompts.
+
+The fix was to set the terminal’s MIN and TIME to 0. Additionally, the call
+to stdio getchar() was replaced with a direct call to read(2), ensuring that
+a read of 0 characters is not interpreted as EOF.
+---
+ 90_common/src/kbhit.c | 19 ++++++-------------
+ 1 file changed, 6 insertions(+), 13 deletions(-)
+
+diff --git a/90_common/src/kbhit.c b/90_common/src/kbhit.c
+index 6cdf77f..c45a0a2 100644
+--- a/90_common/src/kbhit.c
++++ b/90_common/src/kbhit.c
+@@ -64,32 +64,25 @@ void set_conio_terminal_mode()
+ int os_kbhit(void)
+ {
+   struct termios oldt, newt;
+-  int ch;
+   int oldf;
++  int res;
++  char ch;
+ 
+   tcgetattr(STDIN_FILENO, &oldt);
+   newt = oldt;
+   newt.c_lflag &= ~(ICANON | ECHO);
++  newt.c_cc[VMIN] = 0;
++  newt.c_cc[VTIME] = 0;
+   tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+   oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
+   fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
+ 
+-  ch = getchar();
++  res = (read(STDIN_FILENO, &ch, 1) == 1) ? (int)ch : 0;
+ 
+   tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+   fcntl(STDIN_FILENO, F_SETFL, oldf);
+ 
+-  if(ch == EOF)
+-	  return 0 ;
+-  else return ch ;
+-/*
+-  if(ch != EOF)
+-  {
+-    ungetc(ch, stdin);
+-    return 1;
+-  }
+-   return 0;
+-*/
++  return res;
+ }
+ 
+ #endif
+-- 
+2.43.0
+
