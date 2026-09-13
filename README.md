@@ -91,6 +91,9 @@ in [docs/BUILDING.md](docs/BUILDING.md).
 
 ## How-Tos and FAQs
 
+For QBone GPIO-button shutdown and testing, see
+[Controlled Shutdown](docs/CONTROLLED_SHUTDOWN.md).
+
 For answers to frequently asked questions, and insructions on common system
 management tasks, read [docs/HOWTOS_AND_FAQS.md](docs/HOWTOS_AND_FAQS.md).
 
