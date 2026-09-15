@@ -18,14 +18,15 @@ case "$1" in
     exit 1
 esac
 
-AUTOCONFIG_FILE=/boot/autoconfig.txt
+BOOTFS_MOUNT_POINT=/boot
+AUTOCONFIG_FILE=${BOOTFS_MOUNT_POINT}/autoconfig.txt
 
 # If no autoconfig.txt is present, exit immediately
 if [[ ! -f "${AUTOCONFIG_FILE}" ]]; then
   exit 0
 fi
 
-AUTOCONFIG_COMPLETED_FILE=/boot/autoconfig-completed.txt
+AUTOCONFIG_COMPLETED_FILE=${BOOTFS_MOUNT_POINT}/autoconfig-completed.txt
 LEDS=(
   "/sys/class/leds/qunibone:led0"
   "/sys/class/leds/qunibone:led1"
@@ -57,8 +58,14 @@ flash_leds() {
 /usr/local/sbin/autoconfig.sh ${AUTOCONFIG_FILE} | logger -s -t "autoconfig"
 AUTOCONFIG_RES=${PIPESTATUS[0]}
 
+# Remount the boot filesystem for read/write
+mount -o remount,rw ${BOOTFS_MOUNT_POINT}
+
 # Rename the config file so that it doesn't get applied again
 mv "${AUTOCONFIG_FILE}" "${AUTOCONFIG_COMPLETED_FILE}"
+
+# Remount the boot filesystem read-only
+mount -o remount,ro ${BOOTFS_MOUNT_POINT}
 
 # If autoconfiguration was successful, flash the test LEDs in unison
 # 3 times. Otherwise, light the LEDs and leave them on.
