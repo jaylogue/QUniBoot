@@ -30,6 +30,9 @@ CONFIG_PRU_REMOTEPROC=n
 CONFIG_KERNEL_GZIP=y
 CONFIG_KERNEL_XZ=n
 
+# Enable the evdev interface, used to deliver shutdown trigger events
+CONFIG_INPUT_EVDEV=y
+
 # Disable unneeded features to improve boot times
 CONFIG_SECURITY_APPARMOR=n
 CONFIG_SECURITY_YAMA=n

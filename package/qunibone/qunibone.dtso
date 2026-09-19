@@ -281,4 +281,23 @@
          };
       };
    };
+
+   // Declare the QUniBone button as an input event source delivering a KEY_PROG1 event
+   fragment@11 {
+      target-path = "/";
+      __overlay__ {
+         qunibone_buttons {
+            compatible = "gpio-keys";
+            label = "qunibone-buttons";
+
+            // BUTTON input on P8.12 (gpio1_12).
+            qunibone_button {
+               label = "QUniBone button";
+               linux,code = <KEY_PROG1>;
+               gpios = <&gpio1 12 GPIO_ACTIVE_HIGH>;
+               debounce-interval = <20>;
+            };
+         };
+      };
+   };
 };
