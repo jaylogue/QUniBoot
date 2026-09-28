@@ -1,0 +1,282 @@
+From: Jay Logue <jay.logue@gmail.com>
+Subject: [PATCH] net: phy: smsc: BeagleBone Black PHY recovery
+
+On the BeagleBone Black (and the BeagleBone Green, which shares its design)
+the onboard LAN8710A PHY can come up in a bad state after a power-on or
+reset event. This patch adds logic to the smsc driver to detect the bad state
+and correct it if possible.
+
+---
+--- a/drivers/net/phy/smsc.c	2025-02-05 10:53:08.000000000 -0800
++++ b/drivers/net/phy/smsc.c	2026-09-28 08:14:20.699285967 -0700
+@@ -638,6 +638,255 @@
+ }
+ EXPORT_SYMBOL_GPL(smsc_phy_probe);
+
++/* Maximum number of times to reset the BBB PHY in an attempt to recover
++ * it from a bad state. */
++#define BBBPHY_MAX_RESET_TRIES	3
++
++/* Bit 13 of the SPECIAL MODES register is documented as reserved.
++ * However, extensive empirical testing suggests that it is a reliable
++ * indicator that the PHY has failed to properly initialize.
++ *
++ * Microchip has identified bit 13 as "CO_CLK_FREQ", which should clear
++ * once strap configuration completes.
++ *
++ * See https://wp.josh.com/2018/06/04/a-software-only-solution-to-the-vexing-beagle-bone-black-phy-issue/
++ * for background.
++ */
++#define MII_LAN83C185_SMR_CO_CLK_FREQ	BIT(13)
++
++/* PHY address field within the SPECIAL MODES register */
++#define MII_LAN83C185_SMR_PHYAD		GENMASK(4, 0)
++
++/* Check if the device represents the BeagleBone Black's built-in PHY
++ */
++static int bbbphy_is_bbb_phy_dev(struct phy_device *phydev)
++{
++	/* Are we running on a BBB or compatible?
++	 * Is the PHY an SMSC LAN8710/LAN8720 (ID 0007.c0fX, any revision)?
++	 * Is it on the AM335x's MDIO controller?
++	 */
++	return (of_machine_is_compatible("ti,am335x-bone-black") &&
++			phy_id_compare(phydev->phy_id, 0x0007c0f0, 0xfffffff0) &&
++			of_device_is_compatible(phydev->mdio.bus->dev.of_node, "ti,davinci_mdio"));
++}
++
++/* Check if the BeagleBone Black's PHY answers at the given address
++ */
++static int bbbphy_is_at_addr(struct mii_bus *bus, int addr)
++{
++	int id1, id2;
++
++	id1 = mdiobus_read(bus, addr, MII_PHYSID1);
++	if (id1 < 0 || id1 == 0xffff)
++		return 0;
++
++	id2 = mdiobus_read(bus, addr, MII_PHYSID2);
++	if (id2 < 0)
++		return 0;
++
++	return ((((u32)id1 << 16) | id2) & 0xfffffff0) == 0x0007c0f0;
++}
++
++/* Search the MDIO bus for the BeagleBone Black's PHY.
++ * Returns the PHY's address or -ENODEV if nothing answers correctly.
++ */
++static int bbbphy_find(struct phy_device *phydev)
++{
++	struct mii_bus *bus = phydev->mdio.bus;
++	int addr;
++
++	/* Search through all possible addresses looking for the BBB PHY.
++	 * If found, return the address. */
++	for (addr = 0; addr < PHY_MAX_ADDR; addr++)
++		if (bbbphy_is_at_addr(bus, addr))
++			return addr;
++
++	/* Return empty-handed */
++	return -ENODEV;
++}
++
++/* Recover the BeagleBone Black PHY from a bad initial state
++ *
++ * On the BeagleBone Black (and the BeagleBone Green, which shares its design)
++ * the onboard LAN8710A PHY can come up in a bad state after a power-on or
++ * reset event. This function detects the bad state and attempts to correct it,
++ * in an effort to recover use of the PHY.
++ *
++ * There are two distinct failure scenarios addressed by this function:
++ *
++ * Failure Case 1: The PHY fails to initialize fully and is left in an unusable
++ * state.
++ *
++ * This case is characterized either by the PHY not responding at any SMI
++ * address, or by bit 13 in the PHY's SPECIAL MODES register being set to 1.
++ *
++ * On BBB models that include hardware support for resetting the PHY (BBB rev
++ * C3 and later, BBG 1.1), the function attempts to resolve case 1 failures by
++ * resetting the PHY up to BBBPHY_MAX_RESET_TRIES times. Reset is performed by
++ * pulsing GPIO1_8 (as configured by the device's reset-gpios property).
++ *
++ * On older hardware revisions, GPIO1_8 is not connected to the PHY's reset line,
++ * so attempts to reset the PHY have no effect and case 1 failures cannot be
++ * recovered.
++ *
++ * Failure Case 2: The PHY initializes, but fails to latch the correct SMI address
++ * and/or operating mode from the strapping pins.
++ *
++ * To address case 2 failures, the function scans the range of SMI addresses looking
++ * for the PHY. If found, it reconfigures the PHY's address and operating mode to
++ * the expected values. Case 2 failures can generally be resolved on all hardware
++ * revisions.
++ *
++ * Note that, in order for recovery to be attempted, the device tree must be
++ * configured such that the PHY driver is probed even when the PHY itself is
++ * unresponsive or answering at the wrong address. This can be achieved by assigning
++ * the device node a fixed PHY ID of 0007.c0f1, e.g.:
++ *
++ * 		&ethphy0 {
++ * 			compatible = "ethernet-phy-id0007.c0f1", "ethernet-phy-ieee802.3-c22";
++ * 		};
++ */
++static void bbbphy_recover(struct phy_device *phydev)
++{
++	struct device *dev = &phydev->mdio.dev;
++	struct mii_bus *bus = phydev->mdio.bus;
++	int expected_addr = phydev->mdio.addr, addr;
++	int smr = -1, expected_smr;
++	int try;
++
++	/* Repeatedly check if the BeagleBone PHY is in a bad state, and if so
++	 * attempt to clear the state by resetting the device...
++	 */
++	for (try = 0; ; try++) {
++
++		/* Search for the BBB PHY on the MDIO bus */
++		addr = bbbphy_find(phydev);
++
++		/* If found ... */
++		if (addr >= 0) {
++
++			/* Read the current state of the SPECIAL MODES register */
++			smr = mdiobus_read(bus, addr, MII_LAN83C185_SPECIAL_MODES);
++
++			/* If the SMR was successfully read, and the CO_CLK_FREQ bit is NOT set,
++			 * then the PHY should be responsive and does not require a reset.
++			 */
++			if (smr >= 0 && !(smr & MII_LAN83C185_SMR_CO_CLK_FREQ))
++				break;
++		}
++
++		/* Give up trying after a limited number of resets */
++		if (try == BBBPHY_MAX_RESET_TRIES ||
++		    (!phydev->mdio.reset_gpio && !phydev->mdio.reset_ctrl)) {
++			dev_err(dev, "BBB PHY %s after %d reset(s); giving up\n",
++				addr < 0 ? "not responding" : "unrecoverable", try);
++			return;
++		}
++
++		/* Attempt to reset the PHY using GPIO1_8. Note that this only works on
++		 * BeagleBone revisions with the necessary PHY reset hardware (BBB rev C3
++		 * and later). On other revisions this is effectively a no-op.
++		 */
++		dev_warn(dev, "BBB PHY %s (SMR = 0x%04x); resetting, attempt %d/%d\n",
++			 addr < 0 ? "not responding" : "in bad state",
++			 smr < 0 ? 0 : smr, try + 1, BBBPHY_MAX_RESET_TRIES);
++		phy_device_reset(phydev, 1);
++		phy_device_reset(phydev, 0);
++	}
++
++	/* Compute the expected value for the SMR based on the desired operating mode
++	 * (All capable, Auto-negotiation enabled) and address (0)
++	 */
++	expected_smr = (smr & ~(MII_LAN83C185_SMR_PHYAD | MII_LAN83C185_MODE_MASK)) |
++					MII_LAN83C185_MODE_ALL |
++					expected_addr;
++
++	/* If the current SMR value is correct, then there's nothing left to do */
++	if (smr == expected_smr) {
++		if (try > 0)
++			dev_info(dev, "BBB PHY recovered successfully\n");
++		else
++			dev_info(dev, "BBB PHY operating normally\n");
++		return;
++	}
++
++	/* Update the SMR with the expected value */
++	dev_warn(dev, "Reconfiguring BBB PHY (current SMR = 0x%04x, new SMR = 0x%04x)\n",
++			 smr, expected_smr);
++	mdiobus_write(bus, addr, MII_LAN83C185_SPECIAL_MODES, expected_smr);
++
++	/* Issue a soft reset to the PHY to ensure the SMR value is applied.
++	 * But first check if the PHY has already switched to the expected address.
++	 * If not, issue the reset to the old address.
++	 */
++	mdiobus_write(bus, bbbphy_is_at_addr(bus, expected_addr) ? expected_addr : addr,
++				  MII_BMCR, BMCR_RESET);
++
++	/* Wait for the soft reset to complete */
++	for (try = 0; try < 500; try++) {
++		int bmcr;
++		usleep_range(1000, 2000);
++		bmcr = mdiobus_read(bus, expected_addr, MII_BMCR);
++		if (bmcr >= 0 && bmcr != 0xffff && !(bmcr & BMCR_RESET))
++			break;
++	}
++
++	/* Verify the PHY now answers at the correct address. */
++	if (!bbbphy_is_at_addr(bus, expected_addr)) {
++		dev_err(dev, "BBB PHY recovery failed; PHY not answering at address %d\n", expected_addr);
++		return;
++	}
++	addr = expected_addr;
++
++	/* Verify the current value of the SMR is as expected */
++	smr = mdiobus_read(bus, addr, MII_LAN83C185_SPECIAL_MODES);
++	if (smr != expected_smr) {
++		dev_err(dev, "BBB PHY recovery failed; unable to reconfigure mode / address (SMR = 0x%04x)\n",
++				smr < 0 ? 0 : smr);
++		return;
++	}
++
++	dev_info(dev, "BBB PHY recovered successfully\n");
++}
++
++/* Special version of smsc_phy_probe() that performs PHY recovery on the BeagleBone Black.
++ */
++static int bbbphy_probe(struct phy_device *phydev)
++{
++	int ret;
++
++	ret = smsc_phy_probe(phydev);
++	if (ret)
++		return ret;
++
++	/* If the device being probed is the BeagleBone Black's built-in PHY, check if the
++	 * PHY is in a bad state and, if so, attempt to recover it.
++	 */
++	if (bbbphy_is_bbb_phy_dev(phydev))
++		bbbphy_recover(phydev);
++
++	return 0;
++}
++
++/* Special version of smsc_phy_reset() that performs PHY recovery on the BeagleBone Black.
++ */
++static int bbbphy_reset(struct phy_device *phydev)
++{
++	/* If the device being reset is the BBB's built-in PHY, check if the PHY is in a bad
++	 * state and attempt recovery if so.
++	 *
++	 * Note: It is necessary to re-perform PHY recovery here because, on devices that support
++	 * PHY hardware reset, the PHY will be reset whenever the device is detached (e.g. when
++	 * the network interface is brought down). Every time the PHY comes out of reset there is
++	 * another opportunity for it to come up in a bad state. Thus the need to attempt recovery
++	 * after every reset.
++	 */
++	if (bbbphy_is_bbb_phy_dev(phydev))
++		bbbphy_recover(phydev);
++
++	return smsc_phy_reset(phydev);
++}
++
+ static struct phy_driver smsc_phy_driver[] = {
+ {
+ 	.phy_id		= 0x0007c0a0, /* OUI=0x00800f, Model#=0x0a */
+@@ -739,12 +988,12 @@
+ 
+ 	/* PHY_BASIC_FEATURES */
+ 
+-	.probe		= smsc_phy_probe,
++	.probe		= bbbphy_probe,
+ 
+ 	/* basic functions */
+ 	.read_status	= lan87xx_read_status,
+ 	.config_init	= smsc_phy_config_init,
+-	.soft_reset	= smsc_phy_reset,
++	.soft_reset	= bbbphy_reset,
+ 	.config_aneg	= lan95xx_config_aneg_ext,
+ 
+ 	/* IRQ related */
