@@ -300,4 +300,16 @@
          };
       };
    };
+
+   // Force creation of the BBB's PHY device by giving it a fixed PHY ID.
+   // This ensures the PHY driver (smsc) is probed even when the PHY is
+   // unresponsive or at the wrong MDIO address, giving recovery logic in
+   // the driver a chance to correct the bad state and recover use of the PHY.
+   fragment@12 {
+      target = <&ethphy0>;
+      __overlay__ {
+         compatible = "ethernet-phy-id0007.c0f1",   // use smsc driver with fixed PHY ID (SMSC LAN8710/LAN8720)
+                      "ethernet-phy-ieee802.3-c22"; // PHY uses IEEE 802.3 Clause 22 protocol
+      };
+   };
 };
