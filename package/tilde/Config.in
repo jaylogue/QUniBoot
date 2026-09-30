@@ -1,0 +1,16 @@
+config BR2_PACKAGE_TILDE
+	bool "tilde"
+	depends on BR2_TOOLCHAIN_HAS_THREADS
+	depends on BR2_INSTALL_LIBSTDCPP
+	select BR2_PACKAGE_HOST_CROSS_LIBTOOL
+	select BR2_PACKAGE_LIBT3CONFIG
+	select BR2_PACKAGE_LIBT3HIGHLIGHT
+	select BR2_PACKAGE_LIBT3WIDGET
+	select BR2_PACKAGE_LIBTRANSCRIPT
+	select BR2_PACKAGE_LIBUNISTRING
+	help
+	  Tilde is a text editor for the console/terminal which provides an intuitive
+	  interface for people accustomed to GUI environments such as Gnome, KDE
+	  and Windows.
+
+	  https://os.ghalkes.nl/tilde/index.html

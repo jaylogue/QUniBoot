@@ -1,0 +1,11 @@
+config BR2_PACKAGE_LIBT3KEY
+	bool "libt3key"
+	select BR2_PACKAGE_HOST_CROSS_LIBTOOL
+	select BR2_PACKAGE_LIBT3CONFIG
+	help
+	  Library that translates terminal key press sequences into
+	  abstract key names, using key mapping files that describe the
+	  key sequences of common terminals. It is used by the tilde text
+	  editor and by other T3 libraries.
+
+	  https://os.ghalkes.nl/t3/libt3key.html

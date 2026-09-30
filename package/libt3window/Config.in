@@ -1,0 +1,13 @@
+config BR2_PACKAGE_LIBT3WINDOW
+	bool "libt3window"
+	select BR2_PACKAGE_HOST_CROSS_LIBTOOL
+	select BR2_PACKAGE_LIBT3CONFIG
+	select BR2_PACKAGE_LIBTRANSCRIPT
+	select BR2_PACKAGE_LIBUNISTRING
+	select BR2_PACKAGE_NCURSES
+	help
+	  C library implementing the console window handling for the T3
+	  user interface libraries. It provides the window, screen and
+	  character cell abstractions on top of ncurses.
+
+	  https://os.ghalkes.nl/t3/libt3window.html

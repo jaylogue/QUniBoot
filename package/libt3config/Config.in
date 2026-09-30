@@ -1,0 +1,9 @@
+config BR2_PACKAGE_LIBT3CONFIG
+	bool "libt3config"
+	select BR2_PACKAGE_HOST_CROSS_LIBTOOL
+	help
+	  Library for reading and writing configuration files in the
+	  t3config format. It is used by the tilde text editor and by
+	  other T3 libraries.
+
+	  https://os.ghalkes.nl/t3/libt3config.html

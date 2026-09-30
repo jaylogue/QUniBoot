@@ -1,0 +1,11 @@
+config BR2_PACKAGE_LIBTRANSCRIPT
+	bool "libtranscript"
+	depends on BR2_TOOLCHAIN_HAS_THREADS
+	select BR2_PACKAGE_HOST_CROSS_LIBTOOL
+	help
+	  Library providing terminal input and output abstractions for
+	  console applications, including character set and line discipline
+	  handling. It is used by the tilde text editor and by other T3
+	  libraries.
+
+	  https://os.ghalkes.nl/t3/libtranscript.html

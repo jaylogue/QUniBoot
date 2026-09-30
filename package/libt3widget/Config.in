@@ -1,0 +1,16 @@
+config BR2_PACKAGE_LIBT3WIDGET
+	bool "libt3widget"
+	depends on BR2_TOOLCHAIN_HAS_THREADS
+	depends on BR2_INSTALL_LIBSTDCPP
+	select BR2_PACKAGE_HOST_CROSS_LIBTOOL
+	select BR2_PACKAGE_LIBT3KEY
+	select BR2_PACKAGE_LIBT3WINDOW
+	select BR2_PACKAGE_LIBTRANSCRIPT
+	select BR2_PACKAGE_LIBUNISTRING
+	select BR2_PACKAGE_PCRE2
+	help
+	  C++ library of user interface widgets for console applications.
+	  It provides the text, list and dialog widgets used by the tilde
+	  text editor. X11 and GPM support are disabled.
+
+	  https://os.ghalkes.nl/t3/libt3widget.html

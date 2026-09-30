@@ -1,0 +1,11 @@
+config BR2_PACKAGE_LIBT3HIGHLIGHT
+	bool "libt3highlight"
+	select BR2_PACKAGE_HOST_CROSS_LIBTOOL
+	select BR2_PACKAGE_LIBT3CONFIG
+	select BR2_PACKAGE_PCRE2
+	help
+	  Library for syntax highlighting of text files. The syntax
+	  definitions for the supported languages are stored as data files
+	  and interpreted at run time. It is used by the tilde text editor.
+
+	  https://os.ghalkes.nl/t3/libt3highlight.html

@@ -7,3 +7,10 @@ include $(BR2_EXTERNAL_QUNIBOOT_PATH)/package/retro-fuse/retro-fuse.mk
 include $(BR2_EXTERNAL_QUNIBOOT_PATH)/package/pdp11monloader/pdp11monloader.mk
 include $(BR2_EXTERNAL_QUNIBOOT_PATH)/package/xxdpdir/xxdpdir.mk
 include $(BR2_EXTERNAL_QUNIBOOT_PATH)/package/cross-libtool/cross-libtool.mk
+include $(BR2_EXTERNAL_QUNIBOOT_PATH)/package/libt3config/libt3config.mk
+include $(BR2_EXTERNAL_QUNIBOOT_PATH)/package/libtranscript/libtranscript.mk
+include $(BR2_EXTERNAL_QUNIBOOT_PATH)/package/libt3window/libt3window.mk
+include $(BR2_EXTERNAL_QUNIBOOT_PATH)/package/libt3key/libt3key.mk
+include $(BR2_EXTERNAL_QUNIBOOT_PATH)/package/libt3highlight/libt3highlight.mk
+include $(BR2_EXTERNAL_QUNIBOOT_PATH)/package/libt3widget/libt3widget.mk
+include $(BR2_EXTERNAL_QUNIBOOT_PATH)/package/tilde/tilde.mk
