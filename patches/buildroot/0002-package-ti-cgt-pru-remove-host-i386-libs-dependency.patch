@@ -1,0 +1,37 @@
+From 3f5c8a1e0b2d4f6a8c9e1d3b5a7f9c0e2d4b6a8c Mon Sep 17 00:00:00 2001
+From: Jay Logue <jay.logue@gmail.com>
+Date: Mon, 30 Sep 2025 12:00:00 -0700
+Subject: [PATCH] package/ti-cgt-pru: remove dependency on host i386 libraries
+
+The TI Code Generation Tools for the PRU (version 2.3.3) are provided
+as statically linked x86-64 binaries and do not require the host i386
+compatibility libraries to run.
+
+The "select BR2_HOSTARCH_NEEDS_IA32_LIBS" entry causes the build to
+fail on 64-bit host systems that do not have the i386 compatibility
+libraries installed, even though the ti-cgt-pru tools execute without
+them.
+
+Remove the select so that the package can be built and used on such
+systems.
+
+Signed-off-by: Jay Logue <jay.logue@gmail.com>
+---
+ package/ti-cgt-pru/Config.in.host | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/package/ti-cgt-pru/Config.in.host b/package/ti-cgt-pru/Config.in.host
+index 8c3a7f2e1d..b5d9e4c6a8 100644
+--- a/package/ti-cgt-pru/Config.in.host
++++ b/package/ti-cgt-pru/Config.in.host
+@@ -7,7 +7,6 @@ config BR2_PACKAGE_HOST_TI_CGT_PRU_ARCH_SUPPORTS
+ config BR2_PACKAGE_HOST_TI_CGT_PRU
+ 	bool "host ti-cgt-pru"
+ 	depends on BR2_PACKAGE_HOST_TI_CGT_PRU_ARCH_SUPPORTS
+-	select BR2_HOSTARCH_NEEDS_IA32_LIBS
+ 	help
+ 	  This package provides the Code Generation Tools for the PRU
+ 	  unit found on some TI processors e.g. AM3358.
+-- 
+2.43.0
+
