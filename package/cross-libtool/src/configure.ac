@@ -1,0 +1,8 @@
+AC_INIT([cross-libtool], [1.0])
+AC_CONFIG_AUX_DIR([build-aux])
+AC_CONFIG_MACRO_DIRS([m4])
+AC_PROG_CC
+AC_PROG_CXX
+LT_INIT
+LT_LANG([C++])
+AC_OUTPUT
