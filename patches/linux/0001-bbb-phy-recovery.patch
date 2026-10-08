@@ -7,12 +7,12 @@ reset event. This patch adds logic to the smsc driver to detect the bad state
 and correct it if possible.
 
 ---
---- a/drivers/net/phy/smsc.c	2025-02-05 10:53:08.000000000 -0800
-+++ b/drivers/net/phy/smsc.c	2026-09-28 08:14:20.699285967 -0700
-@@ -638,6 +638,255 @@
+--- a/drivers/net/phy/smsc.c	2026-10-04 10:30:57.000000000 -0700
++++ b/drivers/net/phy/smsc.c	2026-10-07 19:32:17.050864670 -0700
+@@ -685,6 +685,255 @@
  }
  EXPORT_SYMBOL_GPL(smsc_phy_probe);
-
+ 
 +/* Maximum number of times to reset the BBB PHY in an attempt to recover
 + * it from a bad state. */
 +#define BBBPHY_MAX_RESET_TRIES	3
@@ -265,10 +265,10 @@ and correct it if possible.
  static struct phy_driver smsc_phy_driver[] = {
  {
  	.phy_id		= 0x0007c0a0, /* OUI=0x00800f, Model#=0x0a */
-@@ -739,12 +988,12 @@
- 
+@@ -787,12 +1036,12 @@
  	/* PHY_BASIC_FEATURES */
  
+ 	.flags		= PHY_RST_AFTER_CLK_EN,
 -	.probe		= smsc_phy_probe,
 +	.probe		= bbbphy_probe,
  

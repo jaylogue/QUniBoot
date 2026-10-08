@@ -6,6 +6,7 @@
 
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/input/input.h>
+#include "bbb-pins.h"
 
 / {
    compatible = "ti,beaglebone", "ti,beaglebone-black";
@@ -79,6 +80,11 @@
    // avoid conflict with the pin assignments here, thus rendering the eMMC inaccessible
    // from linux.
    //
+   // NOTE: The am33xx pinmux node uses #pinctrl-cells = <2>, so each entry is
+   // three cells: <offset conf mux>. AM33XX_PADCONF(pin, conf, mux) produces
+   // exactly that, converting the absolute AM335X_PIN_* register offset to an
+   // offset relative to the pinmux node (base 0x44e10800).
+   //
    fragment@0 {
       target = <&am33xx_pinmux>;
       __overlay__ {
@@ -94,60 +100,66 @@
          gpio_pins: pinmux_gpio_pins {
             pinctrl-single,pins = <
 
-               0x010 0x2f // SW0 input on P8.23: gpio1_4, rx, no pull up/dn, mode=7
-               0x014 0x2f // SW1 input on P8.22: gpio1_5, rx, no pull up/dn, mode=7
-               0x018 0x2f // SW2 input on P8.3: gpio1_6, rx, no pull up/dn, mode=7
-               0x01c 0x2f // SW3 input on P8.4: gpio1_7, rx, no pull up/dn, mode=7
-               0x030 0x2f // BUTTON input on P8.12: gpio1_12, rx, no pull up/dn, mode=7
+               AM33XX_PADCONF(BBB_P8_23,  PIN_INPUT,           MUX_MODE7)  // SW0 input on P8.23: gpio1_4
+               AM33XX_PADCONF(BBB_P8_22,  PIN_INPUT,           MUX_MODE7)  // SW1 input on P8.22: gpio1_5
+               AM33XX_PADCONF(BBB_P8_03,  PIN_INPUT,           MUX_MODE7)  // SW2 input on P8.03: gpio1_6
+               AM33XX_PADCONF(BBB_P8_04,  PIN_INPUT,           MUX_MODE7)  // SW3 input on P8.04: gpio1_7
+               
+               AM33XX_PADCONF(BBB_P8_12,  PIN_INPUT,           MUX_MODE7)  // BUTTON input on P8.12: gpio1_12
 
-               0x000 0x07 // LED0 output on P8.25: gpio1_0, pulldown, mode=7
-               0x004 0x07 // LED1 output on P8.24: gpio1_1, pulldown, mode=7
-               0x008 0x07 // LED2 output on P8.05: gpio1_2, pulldown, mode=7
-               0x00c 0x07 // LED3 output on P8.06: gpio1_3, pulldown, mode=7
-               0x038 0x17 // REG_ENABLE output on P8.16: gpio1_14, pullup, mode=7
-               0x034 0x17 // BUS_ENABLE output on P8.11: gpio1_13, pullup, mode=7
+               AM33XX_PADCONF(BBB_P8_25,  PIN_OUTPUT_PULLDOWN, MUX_MODE7)  // LED0 output on P8.25: gpio1_0
+               AM33XX_PADCONF(BBB_P8_24,  PIN_OUTPUT_PULLDOWN, MUX_MODE7)  // LED1 output on P8.24: gpio1_1
+               AM33XX_PADCONF(BBB_P8_05,  PIN_OUTPUT_PULLDOWN, MUX_MODE7)  // LED2 output on P8.05: gpio1_2
+               AM33XX_PADCONF(BBB_P8_06,  PIN_OUTPUT_PULLDOWN, MUX_MODE7)  // LED3 output on P8.06: gpio1_3
+               
+               AM33XX_PADCONF(BBB_P8_16,  PIN_OUTPUT_PULLUP,   MUX_MODE7)  // REG_ENABLE output on P8.16: gpio1_14
+               AM33XX_PADCONF(BBB_P8_11,  PIN_OUTPUT_PULLUP,   MUX_MODE7)  // BUS_ENABLE output on P8.11: gpio1_13
 
-               0x180 0x30 // UART1 RXD on P9.26, receiver, pullup, mode=0=UART1
-               0x184 0x10 // UART1 TXD on P9.24, xmitter, pullup, mode=0=UART1
-               0x150 0x31 // UART2 RXD on P9.22, receiver, pullup, mode=1=UART2
-               0x154 0x11 // UART2 TXD on P9.21, xmitter, pullup, mode=1=UART2
+               AM33XX_PADCONF(BBB_P9_26,  PIN_INPUT_PULLUP,    MUX_MODE0)  // UART1 RXD on P9.26
+               AM33XX_PADCONF(BBB_P9_24,  PIN_OUTPUT_PULLUP,   MUX_MODE0)  // UART1 TXD on P9.24
+               AM33XX_PADCONF(BBB_P9_22,  PIN_INPUT_PULLUP,    MUX_MODE1)  // UART2 RXD on P9.22
+               AM33XX_PADCONF(BBB_P9_21,  PIN_OUTPUT_PULLUP,   MUX_MODE1)  // UART2 TXD on P9.21
 
-               0x070 0x07 // Activity LED on P9.11 (later PCBs only): gpio0_30, pulldown, mode=7
+               AM33XX_PADCONF(BBB_P9_11,  PIN_OUTPUT_PULLDOWN, MUX_MODE7)  // Activity LED on P9.11 (later PCBs only): gpio0_30
 
-               0x078 0x17 // I2C panel reset on P9.12: gpio1_28, pullup, mode=7
+               AM33XX_PADCONF(BBB_P9_12,  PIN_OUTPUT_PULLUP,   MUX_MODE7)  // I2C panel reset on P9.12: gpio1_28
 
-               0x09c 0x02 // 50/60Hz generation, Timer5 output on P8.09, pulldown, mode=2
+               AM33XX_PADCONF(BBB_P8_09,  PIN_OUTPUT_PULLDOWN, MUX_MODE2)  // 50/60Hz generation, Timer5 output on P8.09
             >;
          };
 
          // PRU GPIO pins
          pru_pru_pins: pinmux_pru_pru_pins {
             pinctrl-single,pins = <
-               0x190 0x15 // PRU0 REG_DATOUT_0 on P9.31: pr1_pru0_pru_r30_0, fast, pullup, mode=5
-               0x194 0x15 // PRU0 REG_DATOUT_1 on P9.29: pr1_pru0_pru_r30_1, fast, pullup, mode=5
-               0x198 0x15 // PRU0 REG_DATOUT_2 on P9.30: pr1_pru0_pru_r30_2, fast, pullup, mode=5
-               0x19c 0x15 // PRU0 REG_DATOUT_3 on P9.28: pr1_pru0_pru_r30_3, fast, pullup, mode=5
-               0x1a0 0x15 // PRU0 REG_DATOUT_4 on P9.42: pr1_pru0_pru_r30_4, fast, pullup, mode=5
-               0x1a4 0x15 // PRU0 REG_DATOUT_5 on P9.27: pr1_pru0_pru_r30_5, fast, pullup, mode=5
-               0x1a8 0x15 // PRU0 REG_DATOUT_6 on P9.41: pr1_pru0_pru_r30_6, fast, pullup, mode=5
-               0x1ac 0x15 // PRU0 REG_DATOUT_7 on P9.25: pr1_pru0_pru_r30_7, fast, pullup, mode=5
-               0x164 0x2f // P9.42 REG_DATOUT_4 tied to GPIO0_7: GPIO tristate! input, no pull up/dn, mode=7
-               0x1b4 0x2f // P9.41 REG_DATOUT_6 tied to GPIO0_20: GPIO tristate! input, no pull up/dn, mode=7
+               AM33XX_PADCONF(BBB_P9_31,  PIN_OUTPUT_PULLUP,   MUX_MODE5)  // PRU0 REG_DATOUT_0 on P9.31: pr1_pru0_pru_r30_0
+               AM33XX_PADCONF(BBB_P9_29,  PIN_OUTPUT_PULLUP,   MUX_MODE5)  // PRU0 REG_DATOUT_1 on P9.29: pr1_pru0_pru_r30_1
+               AM33XX_PADCONF(BBB_P9_30,  PIN_OUTPUT_PULLUP,   MUX_MODE5)  // PRU0 REG_DATOUT_2 on P9.30: pr1_pru0_pru_r30_2
+               AM33XX_PADCONF(BBB_P9_28,  PIN_OUTPUT_PULLUP,   MUX_MODE5)  // PRU0 REG_DATOUT_3 on P9.28: pr1_pru0_pru_r30_3
+               AM33XX_PADCONF(BBB_P9_42B, PIN_OUTPUT_PULLUP,   MUX_MODE5)  // PRU0 REG_DATOUT_4 on P9.42: pr1_pru0_pru_r30_4
+               AM33XX_PADCONF(BBB_P9_27,  PIN_OUTPUT_PULLUP,   MUX_MODE5)  // PRU0 REG_DATOUT_5 on P9.27: pr1_pru0_pru_r30_5
+               AM33XX_PADCONF(BBB_P9_41B, PIN_OUTPUT_PULLUP,   MUX_MODE5)  // PRU0 REG_DATOUT_6 on P9.41: pr1_pru0_pru_r30_6
+               AM33XX_PADCONF(BBB_P9_25,  PIN_OUTPUT_PULLUP,   MUX_MODE5)  // PRU0 REG_DATOUT_7 on P9.25: pr1_pru0_pru_r30_7
 
-               0x0a0 0x2e // PRU1 REG_DATIN_0 on P8.45: pr1_pru1_pru_r31_0, fast, rx, no pulldown, mode=6
-               0x0a4 0x2e // PRU1 REG_DATIN_1 on P8.46: pr1_pru1_pru_r31_1, fast, rx, no pulldown, mode=6
-               0x0a8 0x2e // PRU1 REG_DATIN_2 on P8.43: pr1_pru1_pru_r31_2, fast, rx, no pulldown, mode=6
-               0x0ac 0x2e // PRU1 REG_DATIN_3 on P8.44: pr1_pru1_pru_r31_3, fast, rx, no pulldown, mode=6
-               0x0b0 0x2e // PRU1 REG_DATIN_4 on P8.41: pr1_pru1_pru_r31_4, fast, rx, no pulldown, mode=6
-               0x0b4 0x2e // PRU1 REG_DATIN_5 on P8.42: pr1_pru1_pru_r31_5, fast, rx, no pulldown, mode=6
-               0x0b8 0x2e // PRU1 REG_DATIN_6 on P8.39: pr1_pru1_pru_r31_6, fast, rx, no pulldown, mode=6
-               0x0bc 0x2e // PRU1 REG_DATIN_7 on P8.40: pr1_pru1_pru_r31_7, fast, rx, no pulldown, mode=6
-               0x0e0 0x05 // PRU1 REG_ADR_0 on P8.27: pr1_pru1_pru_r30_8, fast, output, pulldown, mode=5
-               0x0e4 0x05 // PRU1 REG_ADR_1 on P8.29: pr1_pru1_pru_r30_9, fast, output, pulldown, mode=5
-               0x0e8 0x05 // PRU1 REG_ADR_2 on P8.28: pr1_pru1_pru_r30_10, fast, output, pulldown, mode=5
-               0x0ec 0x15 // PRU1 REG_WRITE on P8.30: pr1_pru1_pru_r30_11, fast, output, pullup, mode=5
-               0x080 0x05 // PRU1 PRU1_12 (DEBUG PIN 0) on P8.21: pr1_pru1_pru_r30_12, fast, output, pulldown, mode=5
-               0x084 0x05 // PRU1 PRU1_13 (DEBUG PIN 1) on P8.20: pr1_pru1_pru_r30_13, fast, output, pulldown, mode=5
+               AM33XX_PADCONF(BBB_P8_45,  PIN_INPUT,           MUX_MODE6)  // PRU1 REG_DATIN_0 on P8.45: pr1_pru1_pru_r31_0
+               AM33XX_PADCONF(BBB_P8_46,  PIN_INPUT,           MUX_MODE6)  // PRU1 REG_DATIN_1 on P8.46: pr1_pru1_pru_r31_1
+               AM33XX_PADCONF(BBB_P8_43,  PIN_INPUT,           MUX_MODE6)  // PRU1 REG_DATIN_2 on P8.43: pr1_pru1_pru_r31_2
+               AM33XX_PADCONF(BBB_P8_44,  PIN_INPUT,           MUX_MODE6)  // PRU1 REG_DATIN_3 on P8.44: pr1_pru1_pru_r31_3
+               AM33XX_PADCONF(BBB_P8_41,  PIN_INPUT,           MUX_MODE6)  // PRU1 REG_DATIN_4 on P8.41: pr1_pru1_pru_r31_4
+               AM33XX_PADCONF(BBB_P8_42,  PIN_INPUT,           MUX_MODE6)  // PRU1 REG_DATIN_5 on P8.42: pr1_pru1_pru_r31_5
+               AM33XX_PADCONF(BBB_P8_39,  PIN_INPUT,           MUX_MODE6)  // PRU1 REG_DATIN_6 on P8.39: pr1_pru1_pru_r31_6
+               AM33XX_PADCONF(BBB_P8_40,  PIN_INPUT,           MUX_MODE6)  // PRU1 REG_DATIN_7 on P8.40: pr1_pru1_pru_r31_7
+               
+               AM33XX_PADCONF(BBB_P8_27,  PIN_OUTPUT_PULLDOWN, MUX_MODE5)  // PRU1 REG_ADR_0 on P8.27: pr1_pru1_pru_r30_8
+               AM33XX_PADCONF(BBB_P8_29,  PIN_OUTPUT_PULLDOWN, MUX_MODE5)  // PRU1 REG_ADR_1 on P8.29: pr1_pru1_pru_r30_9
+               AM33XX_PADCONF(BBB_P8_28,  PIN_OUTPUT_PULLDOWN, MUX_MODE5)  // PRU1 REG_ADR_2 on P8.28: pr1_pru1_pru_r30_10
+               
+               AM33XX_PADCONF(BBB_P8_30,  PIN_OUTPUT_PULLUP,   MUX_MODE5)  // PRU1 REG_WRITE on P8.30: pr1_pru1_pru_r30_11
+               
+               AM33XX_PADCONF(BBB_P8_21,  PIN_OUTPUT_PULLDOWN, MUX_MODE5)  // PRU1 PRU1_12 (DEBUG PIN 0) on P8.21: pr1_pru1_pru_r30_12
+               AM33XX_PADCONF(BBB_P8_20,  PIN_OUTPUT_PULLDOWN, MUX_MODE5)  // PRU1 PRU1_13 (DEBUG PIN 1) on P8.20: pr1_pru1_pru_r30_13
+
+               AM33XX_PADCONF(BBB_P9_42A, PIN_INPUT,           MUX_MODE7)  // Unused; also tied to P9.42: input, no pull up/dn
+               AM33XX_PADCONF(BBB_P9_41A, PIN_INPUT,           MUX_MODE7)  // Unused; also tied to P9.41: input, no pull up/dn
             >;
          };
       };
